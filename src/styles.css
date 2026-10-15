@@ -302,12 +302,17 @@ button, a, input, select, textarea { touch-action: manipulation; }
   }
 }
 
+/*
+ * `backwards` matters: these chips are staggered with animation-delay, and
+ * without it they sit at their static position at full opacity until their
+ * turn, so all three pile up on top of each other on first paint.
+ */
 .bd-rail-x {
-  animation: bd-rail-x 8s linear infinite;
+  animation: bd-rail-x 8s linear infinite backwards;
 }
 
 .bd-rail-y {
-  animation: bd-rail-y 8s linear infinite;
+  animation: bd-rail-y 8s linear infinite backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -319,6 +319,8 @@ function CustomerAssistantWidget({
 }
 
 const FAB_TUCKED_KEY = "bd-assistant-tucked";
+/** Session-scoped: the 10s intro plays once per visit, not once per page. */
+const FAB_INTRO_KEY = "bd-assistant-intro-done";
 
 /**
  * The launcher used to be an anonymous chat bubble in the corner — nothing
@@ -371,9 +373,28 @@ function AssistantLauncher({
     }
   };
 
+  // Introduce the assistant for 10s on the first page of a visit, then tuck it
+  // away. On later pages it starts tucked and waits for the cursor.
   useEffect(() => {
+    let introDone = false;
+    try {
+      introDone = sessionStorage.getItem(FAB_INTRO_KEY) === "1";
+    } catch {
+      /* blocked storage — treat as a fresh visit */
+    }
+    if (introDone) {
+      setAutoTucked(true);
+      return;
+    }
     if (tucked || engaged || open) return;
-    const id = window.setTimeout(() => setAutoTucked(true), 10000);
+    const id = window.setTimeout(() => {
+      setAutoTucked(true);
+      try {
+        sessionStorage.setItem(FAB_INTRO_KEY, "1");
+      } catch {
+        /* non-fatal */
+      }
+    }, 10000);
     return () => clearTimeout(id);
   }, [tucked, engaged, open]);
 
