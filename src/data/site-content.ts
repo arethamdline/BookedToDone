@@ -5,6 +5,22 @@
  * data that the demo app runs on stays in `mock-data.ts` per AGENTS.md.
  */
 
+import {
+  BadgeCheck,
+  BarChart3,
+  BellRing,
+  Bot,
+  CalendarCheck,
+  CalendarDays,
+  Camera,
+  ClipboardList,
+  CreditCard,
+  Inbox,
+  Receipt,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
+
 export type FeatureSide = "customer" | "staff";
 
 export type Feature = {
@@ -14,6 +30,8 @@ export type Feature = {
   title: string;
   /** One line under the tile title. */
   tagline: string;
+  /** Shown beside the title so the list can be skimmed. */
+  icon: LucideIcon;
   /** The slug of the tile this one is wired to on the other side. */
   partner: string;
   /** The pain, in one line. */
@@ -36,6 +54,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "AI assistant, 24/7",
     tagline: "Answers at 9 pm, in your prices.",
+    icon: Bot,
     partner: "inbox",
     problem: "The call you miss at 9 pm is the job someone else books at 9:05.",
     does: [
@@ -55,6 +74,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "AI photo estimate",
     tagline: "A photo becomes a price range.",
+    icon: Camera,
     partner: "job-card",
     problem:
       "Every quote costs you a site visit or a long back-and-forth about what's in the pile.",
@@ -75,6 +95,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "Booking + deposit",
     tagline: "A held slot, not a maybe.",
+    icon: CalendarCheck,
     partner: "schedule",
     problem: "A booking with nothing behind it is a slot you're holding for free.",
     does: [
@@ -94,6 +115,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "Reminders + on-my-way",
     tagline: "They know when you're coming.",
+    icon: BellRing,
     partner: "crew-app",
     problem: "Half your phone time is customers asking where the truck is.",
     does: [
@@ -113,6 +135,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "On-site price approval",
     tagline: "The change is agreed, in writing.",
+    icon: BadgeCheck,
     partner: "payments",
     problem: "The pile is bigger than the photo, and now it's an argument in a driveway.",
     does: [
@@ -132,6 +155,7 @@ export const features: Feature[] = [
     side: "customer",
     title: "Tap to pay + review",
     tagline: "Paid before the truck pulls away.",
+    icon: CreditCard,
     partner: "owner-dashboard",
     problem: "The work is done, the money is thirty days out, and you're the one chasing it.",
     does: [
@@ -152,6 +176,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "One inbox",
     tagline: "Chat, phone, web and email, one thread.",
+    icon: Inbox,
     partner: "ai-assistant",
     problem: "The same customer reaches you four ways and you piece the story together each time.",
     does: [
@@ -171,6 +196,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "Self-filling job card",
     tagline: "Zero fields typed by staff.",
+    icon: ClipboardList,
     partner: "photo-estimate",
     problem: "Everything the customer already told you gets typed again, by you.",
     does: [
@@ -190,6 +216,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "Schedule by truck and crew",
     tagline: "The day, on one screen.",
+    icon: CalendarDays,
     partner: "booking-deposit",
     problem: "The day lives in a whiteboard, a group chat and your head.",
     does: [
@@ -209,6 +236,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "Crew app",
     tagline: "The phone in the truck.",
+    icon: Truck,
     partner: "reminders",
     problem: "Your crew calls you for the details, and calls you again with the changes.",
     does: [
@@ -228,6 +256,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "Payments + follow-ups",
     tagline: "Invoices that chase themselves.",
+    icon: Receipt,
     partner: "price-approval",
     problem: "Unpaid jobs sit there until you remember to go looking for them.",
     does: [
@@ -247,6 +276,7 @@ export const features: Feature[] = [
     side: "staff",
     title: "Owner dashboard",
     tagline: "Your week, written up by AI.",
+    icon: BarChart3,
     partner: "tap-to-pay",
     problem: "You find out how the week went once it's already over.",
     does: [

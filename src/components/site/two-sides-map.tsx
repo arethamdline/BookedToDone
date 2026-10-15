@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, CornerDownRight } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 
 import { customerFeatures, getFeature, type Feature } from "@/data/site-content";
 import { prospectSearch, useProspect } from "@/lib/prospect";
@@ -37,8 +37,20 @@ function Half({
           : "focus-visible:ring-bd-green lg:hover:border-bd-green",
       )}
     >
-      <p className="font-display text-[15px] font-bold text-bd-navy">{feature.title}</p>
-      <p className="mt-0.5 text-[13px] leading-snug text-bd-body">{feature.tagline}</p>
+      <div className="flex items-start gap-2.5">
+        <span
+          className={cn(
+            "mt-0.5 grid size-7 shrink-0 place-items-center rounded-md",
+            side === "customer" ? "bg-bd-blue-soft text-bd-blue" : "bg-bd-done-tint text-bd-green",
+          )}
+        >
+          <feature.icon className="size-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="font-display text-[15px] font-bold text-bd-navy">{feature.title}</p>
+          <p className="mt-0.5 text-[13px] leading-snug text-bd-body">{feature.tagline}</p>
+        </div>
+      </div>
     </Link>
   );
 }
@@ -79,14 +91,11 @@ export function TwoSidesMap() {
             <Half feature={customer} side="customer" search={search} />
 
             {/* the hand-off: a divider on a phone, the gutter arrow on desktop */}
-            <div
-              aria-hidden="true"
-              className="flex items-center gap-2 px-3 lg:justify-center lg:px-0"
-            >
+            <div aria-hidden="true" className="flex items-center justify-center gap-2 px-3 lg:px-0">
               <span className="h-px flex-1 bg-bd-line" />
-              <CornerDownRight className="size-3.5 shrink-0 text-bd-blue/60 lg:hidden" />
+              <ArrowDown className="size-4 shrink-0 text-bd-blue/60 lg:hidden" />
               <ArrowRight className="hidden size-4 shrink-0 text-bd-blue/50 transition-all group-hover:translate-x-0.5 group-hover:text-bd-blue lg:block" />
-              <span className="hidden h-px flex-1 bg-bd-line lg:block" />
+              <span className="h-px flex-1 bg-bd-line" />
             </div>
 
             <Half feature={staff} side="staff" search={search} />
