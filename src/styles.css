@@ -172,3 +172,123 @@
 input[type=checkbox] { accent-color: #166534; }
 button, a, input, select, textarea { touch-action: manipulation; }
 :focus-visible { outline: 2px solid #166534; outline-offset: 3px; }
+
+/* ---------------------------------------------------------------------------
+ * Booked to Done company brand.
+ *
+ * These belong to the Booked to Done shell (the company site). The sample junk
+ * company inside the demo frames keeps its own warm/green palette above, so the
+ * two never get confused for each other.
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  --color-bd-blue: oklch(0.54 0.24 263);
+  --color-bd-blue-ink: oklch(0.41 0.19 263);
+  --color-bd-blue-soft: oklch(0.93 0.045 263);
+  --color-bd-navy: oklch(0.22 0.05 263);
+  --color-bd-navy-soft: oklch(0.28 0.06 263);
+  --color-bd-green: oklch(0.72 0.16 161);
+  --color-bd-paper: oklch(0.975 0.006 265);
+}
+
+@keyframes bd-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes bd-dash {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes bd-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.54 0.24 263 / 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px oklch(0.54 0.24 263 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.54 0.24 263 / 0);
+  }
+}
+
+.bd-dash {
+  stroke-dasharray: 6 10;
+  animation: bd-dash 1.1s linear infinite;
+}
+
+.bd-pulse {
+  animation: bd-pulse-ring 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bd-dash,
+  .bd-pulse,
+  [class*="bd-travel"] {
+    animation: none !important;
+  }
+}
+
+@keyframes bd-rail-x {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes bd-rail-y {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.bd-rail-x {
+  animation: bd-rail-x 8s linear infinite;
+}
+
+.bd-rail-y {
+  animation: bd-rail-y 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bd-rail-x,
+  .bd-rail-y {
+    animation: none !important;
+    opacity: 1;
+  }
+}

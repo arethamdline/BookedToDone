@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as CustomerRouteImport } from './routes/customer'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as AssistantIndexRouteImport } from './routes/assistant.index'
 import { Route as AssistantThreadIdRouteImport } from './routes/assistant.$threadId'
+import { Route as FeaturesSlugRouteImport } from './routes/features.$slug'
 import { Route as StaffInboxRouteImport } from './routes/staff_.inbox'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,6 +33,11 @@ const BookRoute = BookRouteImport.update({
 const CustomerRoute = CustomerRouteImport.update({
   id: '/customer',
   path: '/customer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalRoute = PortalRouteImport.update({
@@ -53,6 +60,11 @@ const AssistantThreadIdRoute = AssistantThreadIdRouteImport.update({
   path: '/assistant/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeaturesSlugRoute = FeaturesSlugRouteImport.update({
+  id: '/features/$slug',
+  path: '/features/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaffInboxRoute = StaffInboxRouteImport.update({
   id: '/staff_/inbox',
   path: '/staff/inbox',
@@ -63,9 +75,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
   '/customer': typeof CustomerRoute
+  '/demo': typeof DemoRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
+  '/features/$slug': typeof FeaturesSlugRoute
   '/staff/inbox': typeof StaffInboxRoute
   '/assistant/': typeof AssistantIndexRoute
 }
@@ -73,9 +87,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
   '/customer': typeof CustomerRoute
+  '/demo': typeof DemoRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
+  '/features/$slug': typeof FeaturesSlugRoute
   '/staff/inbox': typeof StaffInboxRoute
   '/assistant': typeof AssistantIndexRoute
 }
@@ -84,9 +100,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
   '/customer': typeof CustomerRoute
+  '/demo': typeof DemoRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
+  '/features/$slug': typeof FeaturesSlugRoute
   '/staff_/inbox': typeof StaffInboxRoute
   '/assistant/': typeof AssistantIndexRoute
 }
@@ -96,9 +114,11 @@ export interface FileRouteTypes {
     | '/'
     | '/book'
     | '/customer'
+    | '/demo'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
+    | '/features/$slug'
     | '/staff/inbox'
     | '/assistant/'
   fileRoutesByTo: FileRoutesByTo
@@ -106,9 +126,11 @@ export interface FileRouteTypes {
     | '/'
     | '/book'
     | '/customer'
+    | '/demo'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
+    | '/features/$slug'
     | '/staff/inbox'
     | '/assistant'
   id:
@@ -116,9 +138,11 @@ export interface FileRouteTypes {
     | '/'
     | '/book'
     | '/customer'
+    | '/demo'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
+    | '/features/$slug'
     | '/staff_/inbox'
     | '/assistant/'
   fileRoutesById: FileRoutesById
@@ -127,9 +151,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookRoute: typeof BookRoute
   CustomerRoute: typeof CustomerRoute
+  DemoRoute: typeof DemoRoute
   PortalRoute: typeof PortalRoute
   StaffRoute: typeof StaffRoute
   AssistantThreadIdRoute: typeof AssistantThreadIdRoute
+  FeaturesSlugRoute: typeof FeaturesSlugRoute
   StaffInboxRoute: typeof StaffInboxRoute
   AssistantIndexRoute: typeof AssistantIndexRoute
 }
@@ -155,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/customer'
       fullPath: '/customer'
       preLoaderRoute: typeof CustomerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal': {
@@ -185,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssistantThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/features/$slug': {
+      id: '/features/$slug'
+      path: '/features/$slug'
+      fullPath: '/features/$slug'
+      preLoaderRoute: typeof FeaturesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/staff_/inbox': {
       id: '/staff_/inbox'
       path: '/staff/inbox'
@@ -199,9 +239,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookRoute: BookRoute,
   CustomerRoute: CustomerRoute,
+  DemoRoute: DemoRoute,
   PortalRoute: PortalRoute,
   StaffRoute: StaffRoute,
   AssistantThreadIdRoute: AssistantThreadIdRoute,
+  FeaturesSlugRoute: FeaturesSlugRoute,
   StaffInboxRoute: StaffInboxRoute,
   AssistantIndexRoute: AssistantIndexRoute,
 }
