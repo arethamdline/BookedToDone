@@ -2,6 +2,7 @@ import { communication, readData, updateJob } from "./junk-store";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { createSupportConversations } from "@/data/mock-data";
+import { company } from "@/data/company";
 import {
   supportConversationSchema,
   type SupportConversation,
@@ -125,7 +126,7 @@ export function handoffThread(thread: {
     const history: SupportMessage[] = thread.messages.map((m) => ({
       id: m.id,
       source: m.role === "user" ? "customer" : "bot",
-      author: m.role === "user" ? "Website visitor" : "Smart-Junk bot",
+      author: m.role === "user" ? "Website visitor" : `${company.name} AI`,
       text: m.parts
         .filter((p) => p.type === "text")
         .map((p) => p.text ?? "")
@@ -166,9 +167,50 @@ export function sendWebsiteMessage(id: string, text: string, botReply: string) {
     messages: [
       ...c.messages,
       message("customer", c.customer, text),
-      ...(c.status === "bot" ? [message("bot", "Smart-Junk bot", botReply)] : []),
+      ...(c.status === "bot" ? [message("bot", `${company.name} AI`, botReply)] : []),
     ],
   }));
+}
+export function recordCustomerAssistantMessage(threadId: string, text: string, answer: string) {
+  const customerMessage = message("customer", "Website visitor", text);
+  const assistantMessage = message("bot", "BookedToDone Demo AI", answer);
+  return mutate((items) => {
+    const existing = items.find((conversation) => conversation.threadId === threadId);
+    if (existing)
+      return items.map((conversation) =>
+        conversation.id === existing.id
+          ? {
+              ...conversation,
+              source: "Chat" as const,
+              status: conversation.status === "resolved" ? "needs_staff" : conversation.status,
+              unread: true,
+              subject: conversation.subject || text.slice(0, 70),
+              summary: `Customer asked the AI assistant: ${text}`,
+              lastCustomerAt: Date.now(),
+              messages: [...conversation.messages, customerMessage, assistantMessage],
+            }
+          : conversation,
+      );
+
+    return [
+      {
+        id: `web-${threadId}`,
+        threadId,
+        source: "Chat" as const,
+        customer: "Website visitor",
+        contact: "Guest · this browser",
+        channel: "website" as const,
+        status: "needs_staff" as const,
+        assignee: "",
+        subject: text.slice(0, 70) || "Customer AI assistant question",
+        summary: `Customer asked the AI assistant: ${text}`,
+        lastCustomerAt: Date.now(),
+        unread: true,
+        messages: [customerMessage, assistantMessage],
+      },
+      ...items,
+    ];
+  });
 }
 export function isWindowOpen(c: SupportConversation, now = Date.now()) {
   return true;

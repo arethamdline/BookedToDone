@@ -1,4 +1,5 @@
 import type { SupportConversation } from "@/lib/support-types";
+import { company } from "@/data/company";
 export const statuses = [
   "Requested",
   "Needs Quote",
@@ -122,36 +123,7 @@ export const services = [
   "Office cleanouts",
   "Construction debris",
 ];
-export const defaultPricing: Pricing = {
-  minimum: 125,
-  items: [
-    { id: "sofa", name: "Sofa", category: "Furniture", price: 85, volume: 2.5 },
-    { id: "mattress", name: "Mattress", category: "Furniture", price: 65, volume: 1.5 },
-    { id: "table", name: "Dining table", category: "Furniture", price: 55, volume: 1 },
-    { id: "fridge", name: "Refrigerator", category: "Appliances", price: 95, volume: 2 },
-    { id: "washer", name: "Washer / dryer", category: "Appliances", price: 75, volume: 1.5 },
-    { id: "tv", name: "TV / monitor", category: "Electronics", price: 35, volume: 0.4 },
-    { id: "bags", name: "Bag of general junk", category: "General junk", price: 12, volume: 0.2 },
-    { id: "desk", name: "Office desk", category: "Office cleanouts", price: 45, volume: 1 },
-    {
-      id: "debris",
-      name: "Debris container (50 lb max)",
-      category: "Construction debris",
-      price: 30,
-      volume: 0.4,
-    },
-  ],
-  tiers: [
-    { name: "Minimum / ⅛ load", volume: 2, price: 125 },
-    { name: "¼ load", volume: 4, price: 225 },
-    { name: "½ load", volume: 8, price: 375 },
-    { name: "¾ load", volume: 12, price: 525 },
-    { name: "Full load", volume: 16, price: 675 },
-  ],
-  stairs: 0,
-  parking: 0,
-  heavy: 0,
-};
+export const defaultPricing: Pricing = company.pricing;
 export const today = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

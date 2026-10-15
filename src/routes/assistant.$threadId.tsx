@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dialog";
 import { JunkBookingForm } from "@/components/junk-booking-form";
 import { blankJob, money, dateLabel, windows } from "@/data/mock-data";
+import { answerCompanyQuestion, company } from "@/data/company";
 import { quote, readData, readChatDraft, setChatDraft, useJunk, isCustom } from "@/lib/junk-store";
 import { updateSupport } from "@/lib/support-store";
 
@@ -56,7 +57,7 @@ const defaults: Thread[] = [
         parts: [
           {
             type: "text",
-            text: "Hi, I’m **Smart-Junk**, your demo removal assistant. Tell me which items you have, ask about pricing or accepted items, or select **Book through chat** to enter your pickup details here.",
+            text: `Hi, I’m **${company.name} AI**. Tell me what needs to go and I can help with prices, accepted items, pickup areas, or a booking.`,
           },
         ],
       },
@@ -67,9 +68,9 @@ const THREAD_STORAGE = "smart-junk-assistant-threads";
 export const Route = createFileRoute("/assistant/$threadId")({
   head: () => ({
     meta: [
-      { title: "Ask Bot — Smart-Junk" },
-      { name: "description", content: "Junk removal help from the Smart-Junk assistant." },
-      { property: "og:title", content: "Ask Bot — Smart-Junk" },
+      { title: "AI assistant — Booked to Done" },
+      { name: "description", content: "Junk removal help from the BookedToDone Demo assistant." },
+      { property: "og:title", content: "AI assistant — Booked to Done" },
       { property: "og:description", content: "Junk removal estimates and booking help." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -133,6 +134,11 @@ function AssistantPage() {
       draft.mode = "custom";
       draft.project = text;
       setChatDraft(draft);
+      if (/garage|yard/.test(lower)) {
+        const companyAnswer = answerCompanyQuestion(text, data.pricing);
+        if (companyAnswer)
+          return `${companyAnswer} Select **Book through chat** to add the cleanup to your request.`;
+      }
       if (/book|request|quote/.test(lower)) setBookingOpen(true);
       return "That sounds like a custom cleanup. Tell us about the space and add a few photos if you can. Our team will prepare a quote for your approval—there's no automatic price. Select **Book through chat** to review your request.";
     }
@@ -163,6 +169,8 @@ function AssistantPage() {
         ? "I've added those items. Our team will review your custom request and prepare a quote."
         : `Got it: ${found.map((i) => `${draft.items[i.id]} × ${i.name}`).join(", ")}. Your current item estimate is **${money(result.estimate)}**, including our minimum pickup charge where needed. Where should we collect the items—outside, ground floor, or upstairs? You can review everything in **Book through chat** before submitting.`;
     }
+    const companyAnswer = answerCompanyQuestion(text, data.pricing);
+    if (companyAnswer) return companyAnswer;
     let captured = false;
     const email = text.match(/[^\s@]+@[^\s@]+\.[^\s@]+/);
     if (email) {
@@ -381,12 +389,12 @@ function AssistantPage() {
               <div className="min-w-0">
                 <h1 className="truncate font-display font-bold">
                   {support && support.status !== "bot"
-                    ? "Smart-Junk support team"
-                    : "Smart-Junk assistant"}
+                    ? `${company.name} support team`
+                    : `${company.name} AI`}
                 </h1>
                 <p className="flex items-center gap-1 text-xs text-success-strong">
                   <span className="size-2 rounded-full bg-success-strong" />
-                  English · Demo assistant
+                  English · AI assistant
                 </p>
               </div>
             </div>
@@ -440,6 +448,12 @@ function AssistantPage() {
                           <MessageResponse key={i}>{p.text}</MessageResponse>
                         ) : null,
                       )}
+                      {m.role === "assistant" &&
+                        support?.messages.find((item) => item.id === m.id)?.source !== "staff" && (
+                          <p className="mt-2 text-[10px] text-muted-foreground">
+                            AI answer · from {company.name}'s price list
+                          </p>
+                        )}
                     </MessageContent>
                     {m.role === "user" && (
                       <UserRound className="mt-1 size-5 shrink-0 text-muted-foreground" />
@@ -506,7 +520,7 @@ function AssistantPage() {
                 <PromptInputFooter>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Languages className="size-3" />
-                    Mock assistant
+                    AI
                   </span>
                   <PromptInputSubmit />
                 </PromptInputFooter>

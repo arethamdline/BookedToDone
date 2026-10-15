@@ -204,6 +204,11 @@ export function SupportInbox() {
                   </p>
                   <div className="mt-3 flex items-center justify-between gap-2 text-[10px]">
                     <Channel channel={c.channel} />
+                    {c.source === "Chat" && (
+                      <span className="rounded bg-info-soft px-1.5 py-0.5 font-semibold text-info-strong">
+                        Chat
+                      </span>
+                    )}
                     <span className={cn("rounded px-1.5 py-0.5 font-semibold", tones[c.status])}>
                       {statusLabels[c.status]}
                     </span>
