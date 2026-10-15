@@ -57,6 +57,11 @@ export function DemoGuide() {
     }
   };
 
+  // The staff shell has a fixed 15rem sidebar at z-50 that renders after this
+  // card, so the guide needs a higher layer and must sit clear of that lane.
+  const onStaff = pathname.startsWith("/staff");
+  const place = onStaff ? "z-[65] lg:left-[16.5rem]" : "z-[65]";
+
   const base = stepForPath(pathname);
 
   // Once the deposit is paid, the booking step turns into the hand-off.
@@ -78,7 +83,10 @@ export function DemoGuide() {
       <button
         type="button"
         onClick={() => setCollapsedPersisted(false)}
-        className="fixed bottom-20 left-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5"
+        className={cn(
+          "fixed bottom-20 left-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5",
+          place,
+        )}
       >
         <Compass className="size-4" />
         Show me around
@@ -89,7 +97,10 @@ export function DemoGuide() {
   return (
     <aside
       aria-label="Demo guide"
-      className="fixed bottom-20 left-4 right-4 z-50 max-w-sm rounded-xl border border-bd-navy/10 bg-white p-4 shadow-2xl shadow-bd-navy/20 sm:right-auto lg:bottom-5"
+      className={cn(
+        "fixed bottom-20 left-4 right-4 max-w-sm rounded-xl border border-bd-navy/10 bg-white p-4 shadow-2xl shadow-bd-navy/20 sm:right-auto lg:bottom-5",
+        place,
+      )}
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-bd-blue text-[11px] font-bold text-white">

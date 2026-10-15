@@ -18,6 +18,7 @@ import { Brand } from "./brand";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useSupport } from "@/lib/support-store";
+import { StaffAssistant } from "./staff-assistant";
 const navigation = [
   ["Overview", LayoutDashboard],
   ["Inbox", Inbox],
@@ -103,6 +104,7 @@ export function StaffShell({ page, children }: { page: string; children: ReactNo
           aria-label="Close navigation overlay"
         />
       )}
+      <StaffAssistant />
       <main className="lg:pl-60">
         <header className="flex h-16 items-center gap-3 border-b bg-background px-4 lg:px-7">
           <Button
