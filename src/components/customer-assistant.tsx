@@ -149,9 +149,12 @@ export function CustomerAssistantCard() {
     <section className="rounded-lg border border-white/15 bg-background p-4 text-foreground shadow-2xl sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-sm font-bold">
-          <Bot className="size-5 text-primary" /> Ask {company.name}
+          <span className="bd-ai-gradient grid size-7 place-items-center rounded-md text-white">
+            <Bot className="size-4" />
+          </span>
+          Ask {company.name}
         </span>
-        <span className="rounded bg-accent-strong px-2 py-1 text-[10px] font-bold text-foreground">
+        <span className="bd-ai-gradient rounded px-2 py-1 text-[10px] font-bold text-white">
           AI
         </span>
       </div>
@@ -225,7 +228,7 @@ function CustomerAssistantWidget({
         >
           <header className="flex items-center justify-between gap-3 bg-foreground px-4 py-3 text-background">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="grid size-9 shrink-0 place-items-center rounded-md bg-background/10">
+              <span className="bd-ai-gradient grid size-9 shrink-0 place-items-center rounded-md text-white">
                 <Bot className="size-5" />
               </span>
               <div className="min-w-0">
@@ -367,7 +370,7 @@ function AssistantLauncher({
         type="button"
         onClick={closeChat}
         aria-label="Close AI chat"
-        className="fixed bottom-20 right-3 z-[70] grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
+        className="bd-ai-gradient fixed bottom-20 right-3 z-[70] grid size-14 place-items-center rounded-full text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
       >
         <X className="size-6" />
       </button>
@@ -385,7 +388,7 @@ function AssistantLauncher({
           onFocus={() => setPeeking(true)}
           onClick={() => setTuckedPersisted(false)}
           aria-label="Show the AI assistant"
-          className="pointer-events-auto grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="bd-ai-gradient pointer-events-auto grid size-12 place-items-center rounded-full text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Bot className="size-5" />
         </button>
@@ -408,7 +411,7 @@ function AssistantLauncher({
           type="button"
           onClick={openChat}
           aria-label="Open AI chat"
-          className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-primary pl-2.5 pr-3 text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="bd-ai-gradient flex h-11 shrink-0 items-center gap-1.5 rounded-full pl-2.5 pr-3 text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Bot className="size-5" />
           <span className="text-[10px] font-bold uppercase tracking-wide">AI</span>
