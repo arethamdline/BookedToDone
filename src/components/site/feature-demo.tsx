@@ -132,7 +132,8 @@ export function FeatureDemo({ slug, frame }: { slug: string; frame: "phone" | "l
   const stage =
     frame === "phone" ? (
       <PhoneFrame className="mx-auto w-[15rem]">
-        <div className="h-[24rem] overflow-hidden">{screen}</div>
+        {/* pt clears the notch, which otherwise sits over the first line */}
+        <div className="h-[24rem] overflow-hidden bg-white pt-5">{screen}</div>
       </PhoneFrame>
     ) : (
       <LaptopFrame className="mx-auto w-full max-w-[26rem]">
