@@ -168,11 +168,12 @@ function LandingPage() {
           <div className="mx-auto max-w-2xl text-center">
             <SectionLabel>What we build</SectionLabel>
             <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
-              Everything we offer, on both sides of the job.
+              Twelve pieces, working in six pairs.
             </h2>
-            <p className="mt-3 text-[15px] text-muted-foreground">
-              These are the customer-side and staff-side features. Each one feeds its partner on the
-              other side.
+            <p className="mt-3 text-[15px] leading-relaxed text-bd-body">
+              Every customer-facing feature has a matching one in your office. What your customer
+              does is what lands on your side — which is why nothing needs typing up twice. Open any
+              piece to see it run.
             </p>
           </div>
 
