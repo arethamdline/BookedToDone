@@ -33,22 +33,79 @@ const plans = services.map((name, i) => ({
 }));
 import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): { prospect?: string } => {
+    const prospect = typeof search["prospect"] === "string" ? search["prospect"].trim().slice(0, 40) : "";
+    return prospect ? { prospect } : {};
+  },
   head: () => ({
     meta: [
-      { title: "Smart-Junk — Junk Removal, Smarter Operations." },
-      { name: "description", content: "Book junk removal and manage every pickup in one place." },
-      { property: "og:title", content: "Smart-Junk — Junk removal made simple" },
+      { title: "Booked to Done — AI booking and operations demo" },
+      { name: "description", content: "AI that answers, books and runs your jobs." },
+      { property: "og:title", content: "Booked to Done" },
       {
         property: "og:description",
-        content: "Book junk removal and manage every pickup in one place.",
+        content: "AI that answers, books and runs your jobs.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Home,
+  component: Entry,
 });
-function Home() {
+function Entry() {
+  const { prospect } = Route.useSearch();
+
+  return (
+    <main className="grid min-h-[calc(100dvh-3.5rem)] place-items-center bg-accent/25 px-4 py-5 sm:px-8">
+      <div className="grid w-full max-w-6xl items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-x-14 lg:gap-y-6">
+        <section className="lg:col-start-1 lg:row-start-1">
+          <Brand />
+          <p className="mt-4 text-sm font-semibold text-primary sm:text-base">
+            AI that answers, books and runs your jobs.
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            You talk. We listen. We build it around you.
+          </p>
+        </section>
+        <figure className="overflow-hidden rounded-lg border bg-foreground shadow-lg lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <video
+            controls
+            playsInline
+            preload="none"
+            poster="/junk-removal-hero-v2.png"
+            aria-label="Booked to Done demo video"
+            className="aspect-video w-full object-cover"
+          >
+            <source src="/video/demo-v3.mp4" type="video/mp4" />
+            Your browser does not support HTML video.
+          </video>
+        </figure>
+        <section className="lg:col-start-1 lg:row-start-2">
+          <h1 className="max-w-xl font-display text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[2.75rem]">
+            {prospect
+              ? `${prospect}, here's your booking system, working.`
+              : "Try it as your customer. Watch your office update."}
+          </h1>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button asChild size="xl" className="w-full sm:w-auto">
+              <Link to="/customer">
+                Start the demo <ArrowRight />
+              </Link>
+            </Button>
+            <Link
+              to="/staff"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-foreground transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Skip to the Staff system <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+export function Home() {
   const t = useT();
   return (
     <CustomerShell>

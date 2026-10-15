@@ -8,7 +8,6 @@ import {
   CircleDollarSign,
   Inbox,
   LayoutDashboard,
-  LogOut,
   Menu,
   Settings,
   UsersRound,
@@ -38,7 +37,7 @@ export function StaffShell({ page, children }: { page: string; children: ReactNo
     <div className="min-h-screen bg-muted/40">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r bg-foreground text-background transition-transform lg:translate-x-0",
+          "fixed bottom-0 left-0 top-14 z-50 flex w-60 flex-col border-r bg-foreground text-background transition-transform lg:translate-x-0",
           mobile ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -96,19 +95,10 @@ export function StaffShell({ page, children }: { page: string; children: ReactNo
             );
           })}
         </nav>
-        <div className="border-t border-background/10 p-3">
-          <Link
-            to="/"
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-background/60 hover:bg-background/10"
-          >
-            <LogOut className="size-4" />
-            Customer app
-          </Link>
-        </div>
       </aside>
       {mobile && (
         <button
-          className="fixed inset-0 z-40 bg-foreground/50 lg:hidden"
+          className="fixed bottom-0 left-0 right-0 top-14 z-40 bg-foreground/50 lg:hidden"
           onClick={() => setMobile(false)}
           aria-label="Close navigation overlay"
         />

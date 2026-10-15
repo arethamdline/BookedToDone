@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookRouteImport } from './routes/book'
+import { Route as CustomerRouteImport } from './routes/customer'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as AssistantIndexRouteImport } from './routes/assistant.index'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const BookRoute = BookRouteImport.update({
   id: '/book',
   path: '/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerRoute = CustomerRouteImport.update({
+  id: '/customer',
+  path: '/customer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalRoute = PortalRouteImport.update({
@@ -56,6 +62,7 @@ const StaffInboxRoute = StaffInboxRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
+  '/customer': typeof CustomerRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
+  '/customer': typeof CustomerRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/book': typeof BookRoute
+  '/customer': typeof CustomerRoute
   '/portal': typeof PortalRoute
   '/staff': typeof StaffRoute
   '/assistant/$threadId': typeof AssistantThreadIdRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/book'
+    | '/customer'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/book'
+    | '/customer'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/book'
+    | '/customer'
     | '/portal'
     | '/staff'
     | '/assistant/$threadId'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookRoute: typeof BookRoute
+  CustomerRoute: typeof CustomerRoute
   PortalRoute: typeof PortalRoute
   StaffRoute: typeof StaffRoute
   AssistantThreadIdRoute: typeof AssistantThreadIdRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/book'
       fullPath: '/book'
       preLoaderRoute: typeof BookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer': {
+      id: '/customer'
+      path: '/customer'
+      fullPath: '/customer'
+      preLoaderRoute: typeof CustomerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookRoute: BookRoute,
+  CustomerRoute: CustomerRoute,
   PortalRoute: PortalRoute,
   StaffRoute: StaffRoute,
   AssistantThreadIdRoute: AssistantThreadIdRoute,

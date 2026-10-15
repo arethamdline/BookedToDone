@@ -7,7 +7,7 @@ export function Brand({ compact = false, className }: { compact?: boolean; class
         <Truck className="size-5" />
       </span>
       {!compact && (
-        <span className="font-display text-lg font-bold tracking-normal">Smart-Junk</span>
+        <span className="font-display text-lg font-bold tracking-normal">Booked to Done</span>
       )}
     </div>
   );
