@@ -48,14 +48,14 @@ function LandingPage() {
       <section className="border-b border-bd-navy/10 bg-gradient-to-b from-bd-paper to-white">
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-tight text-balance text-bd-navy sm:text-[2.6rem] lg:text-[3rem]">
-              {prospect ? `${prospect}, your ` : "Your "}customers book, your crew gets it done, and{" "}
-              <span className="text-bd-blue">nothing gets typed twice.</span>
+            <h1 className="text-balance font-display text-[2.2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.9rem] lg:text-[3.4rem]">
+              {prospect ? `${prospect}, stop being the ` : "Stop being the "}
+              <span className="text-bd-blue">bottleneck</span> in your own business.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-bd-body sm:text-base">
-              We build custom AI booking and operations systems for owner-run service businesses.
-              The customer side fills the office side on its own — no re-keying, no lost jobs, no 9
-              pm phone calls you never got.
+              We build AI booking and operations systems for owner-run service businesses. Customers
+              book themselves, jobs arrive in your office already filled in, and the admin stops
+              landing on you at 9 pm.
             </p>
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
