@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Book more jobs, do less paperwork. Custom AI booking and operations systems for owner-run service businesses.",
+          "Do less paperwork, book more jobs. Custom AI booking and operations systems for owner-run service businesses.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Booked to Done" },
@@ -49,8 +49,8 @@ function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance font-display text-[2.2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.9rem] lg:text-[3.4rem]">
-              {prospect ? `${prospect}, book more jobs. ` : "Book more jobs. "}
-              <span className="text-bd-blue">Do less paperwork.</span>
+              {prospect ? `${prospect}, do less paperwork. ` : "Do less paperwork. "}
+              <span className="text-bd-blue">Book more jobs.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-bd-body sm:text-base">
               The AI answers every call and books the job — even at 9 pm. It arrives in your office
