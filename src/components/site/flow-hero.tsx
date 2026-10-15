@@ -27,7 +27,7 @@ export function FlowHero() {
   return (
     <div className="relative">
       {/* Desktop: phone — rail — laptop */}
-      <div className="hidden items-center gap-3 lg:grid lg:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_minmax(0,19rem)]">
+      <div className="mx-auto hidden max-w-4xl items-center gap-4 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)_20rem]">
         <PhoneFrame label="Your customer">
           <div className="h-[19rem]">
             <MiniCustomerQuote />
@@ -51,15 +51,18 @@ export function FlowHero() {
               vectorEffect="non-scaling-stroke"
             />
           </svg>
-          {travelling.map((chip) => (
-            <span
-              key={chip.label}
-              className="bd-rail-x absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-              style={{ animationDelay: chip.delay }}
-            >
-              <TravelChip label={chip.label} to={chip.to} />
-            </span>
-          ))}
+          {/* inset so a chip never overruns the rail onto a device */}
+          <div className="absolute inset-y-0 left-[6rem] right-[6rem]">
+            {travelling.map((chip) => (
+              <span
+                key={chip.label}
+                className="bd-rail-x absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                style={{ animationDelay: chip.delay }}
+              >
+                <TravelChip label={chip.label} to={chip.to} />
+              </span>
+            ))}
+          </div>
         </div>
 
         <LaptopFrame label="Your office">

@@ -88,11 +88,37 @@ function LandingPage() {
           <div className="mx-auto max-w-2xl text-center">
             <SectionLabel>The connected flow</SectionLabel>
             <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
-              One booking fills the office side.
+              Your customer fills in your office for you.
             </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-bd-body">
+              Everything a customer tells you — the photos, the address, the items, the time they
+              picked, the deposit — travels straight onto the job card your crew works from. Nobody
+              in your office retypes any of it, and nothing gets lost between a phone call and a
+              whiteboard.
+            </p>
           </div>
-          <div className="mt-8">
+          <div className="mt-10">
             <FlowHero />
+          </div>
+
+          <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
+            <div className="border-t-2 border-bd-blue pt-3">
+              <p className="font-display text-sm font-bold text-bd-navy">What the customer does</p>
+              <p className="mt-1 text-sm leading-relaxed text-bd-body">
+                Sends a photo, gets a price, picks a time and pays a deposit — on their phone, at
+                whatever hour suits them.
+              </p>
+            </div>
+            <div className="border-t-2 border-bd-green pt-3">
+              <p className="font-display text-sm font-bold text-bd-navy">What you get</p>
+              <p className="mt-1 text-sm leading-relaxed text-bd-body">
+                A job card that filled itself in — tagged
+                <span className="mx-1 rounded-sm bg-bd-done-tint px-1 text-[10px] font-bold uppercase text-bd-green">
+                  auto
+                </span>
+                wherever the customer supplied it, ready to drop onto a truck.
+              </p>
+            </div>
           </div>
         </div>
       </section>
