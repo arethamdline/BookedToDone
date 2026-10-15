@@ -102,7 +102,7 @@ export function StaffAssistant() {
         onClick={() => setOpen(true)}
         className="bd-ai-gradient fixed bottom-5 right-5 z-[66] flex min-h-12 items-center gap-2 rounded-full px-4 text-sm font-bold text-white shadow-xl transition-transform hover:scale-105"
       >
-        <Bot className="size-5" /> Ask the AI
+        <Bot className="size-5" /> Office assistant
       </button>
     );
 
