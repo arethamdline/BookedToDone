@@ -1,0 +1,54 @@
+{
+  "name": "Booked to Done",
+  "source": "Demo video palette v3, 15 October 2026",
+  "rules": [
+    "Backgrounds are white. Text is dark green, never pure black.",
+    "Brand green is for buttons, selected states, the logo and key lines.",
+    "\"Done\" green appears only on Auto chips, checkmarks and paid or approved moments.",
+    "AI moments always use the purple-to-blue gradient.",
+    "Red appears only on the problem X marks."
+  ],
+  "brand": {
+    "brandGreen": {
+      "hex": "#176344",
+      "use": "Logo icon, buttons, chat bubbles, selected options, progress bar, email pill, the brand line and its underline"
+    },
+    "darkGreen": {
+      "hex": "#102C23",
+      "use": "Headlines, main text, wordmark, problem words"
+    },
+    "deepGreen": {
+      "hex": "#0F4A32",
+      "use": "Small labels, crew \"on site\" screen"
+    },
+    "lightGreen": {
+      "hex": "#CFE5D9",
+      "use": "Offset shadows behind phones, cards and the email pill"
+    },
+    "paleGreen": {
+      "hex": "#E2F1E8",
+      "use": "\"Your prices / trucks / dump / crew\" chips"
+    },
+    "white": { "hex": "#FFFFFF", "use": "Every background" }
+  },
+  "neutral": {
+    "bodyGrey": { "hex": "#475569", "use": "Sub-headlines and supporting text" },
+    "lightGrey": { "hex": "#94A3B8", "use": "Timestamps, full time slots" },
+    "lineGrey": { "hex": "#E2E8F0", "use": "Card borders and dividers" },
+    "chipGrey": { "hex": "#F1F5F9", "use": "AI chat bubble, empty item chips" }
+  },
+  "signal": {
+    "doneGreen": { "hex": "#16A34A", "use": "Auto chips, checkmarks, Paid and Approved callouts" },
+    "doneTint": { "hex": "#DCFCE7", "use": "Background behind done states" },
+    "aiPurple": { "hex": "#7C3AED", "use": "Start of the AI gradient (chips, scan line, AI cards)" },
+    "aiBlue": { "hex": "#2563EB", "use": "End of the AI gradient" },
+    "problemRed": { "hex": "#EF4444", "use": "The X next to each problem" },
+    "demoOrange": { "hex": "#9A3412", "use": "\"This is a demo\" tag text, on #FFEDD5" },
+    "demoOrangeBg": { "hex": "#FFEDD5", "use": "Background for the demo tag" },
+    "reviewGold": { "hex": "#F59E0B", "use": "Review stars" }
+  },
+  "fonts": {
+    "display": { "family": "Outfit", "weight": 700, "use": "Headlines" },
+    "body": { "family": "Instrument Sans", "weights": [400, 600, 700], "use": "Body and app screens" }
+  }
+}

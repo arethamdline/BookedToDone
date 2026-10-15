@@ -329,7 +329,7 @@ export function createSupportConversations(now = Date.now()): SupportConversatio
         {
           id: "web-bot",
           source: "bot",
-          author: "Smart-Junk",
+          author: "Sample Junk Co.",
           text: "The item estimate is $138. Our staff can confirm elevator access and pickup details.",
           at: now - 30000,
         },
@@ -361,12 +361,15 @@ export function createSupportConversations(now = Date.now()): SupportConversatio
 }
 export const supportStaff = ["Sarah Carter", "Alex Morgan"];
 export const supportQuickReplies = [
-  { label: "Acknowledge", text: "Thanks for contacting Smart-Junk. I’m checking this for you." },
+  {
+    label: "Acknowledge",
+    text: "Thanks for contacting Sample Junk Co. I’m checking this for you.",
+  },
   {
     label: "Access details",
     text: "Please confirm the number of stairs, elevator availability, and parking access.",
   },
 ];
 export const supportFollowupTemplate =
-  "Hello! Smart-Junk is following up on your removal request. Please reply with your preferred pickup date.";
+  "Hello! Sample Junk Co. is following up on your removal request. Please reply with your preferred pickup date.";
 export const supportPhoneReply = "Recorded phone follow-up: customer asked about crew arrival.";

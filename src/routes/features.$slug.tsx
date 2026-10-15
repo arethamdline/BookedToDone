@@ -136,10 +136,10 @@ function FeaturePage() {
 
         {/* Where it goes next — the point of the whole site */}
         {partner && (
-          <section className="mt-12 overflow-hidden rounded-2xl border border-bd-green/30 bg-bd-green/5">
+          <section className="mt-12 overflow-hidden rounded-2xl border border-bd-blue/25 bg-bd-blue-soft/50">
             <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
               <div className="max-w-xl">
-                <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-bd-green">
+                <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-bd-blue">
                   <CornerDownRight className="size-3.5" /> Where it goes next
                 </p>
                 <h2 className="mt-2.5 font-display text-xl font-bold text-bd-navy sm:text-2xl">
@@ -153,7 +153,7 @@ function FeaturePage() {
                 to="/features/$slug"
                 params={{ slug: partner.slug }}
                 search={search}
-                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 bg-white px-5 text-[15px] font-bold text-bd-navy transition-colors hover:border-bd-green"
+                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 bg-white px-5 text-[15px] font-bold text-bd-navy transition-colors hover:border-bd-blue"
               >
                 {partner.title} <ArrowRight className="size-4" />
               </Link>

@@ -173,7 +173,7 @@ export function sendWebsiteMessage(id: string, text: string, botReply: string) {
 }
 export function recordCustomerAssistantMessage(threadId: string, text: string, answer: string) {
   const customerMessage = message("customer", "Website visitor", text);
-  const assistantMessage = message("bot", "BookedToDone Demo AI", answer);
+  const assistantMessage = message("bot", "Sample Junk Co. AI", answer);
   return mutate((items) => {
     const existing = items.find((conversation) => conversation.threadId === threadId);
     if (existing)

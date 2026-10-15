@@ -306,7 +306,7 @@ export const entryPaths = [
 export const howWeWork = [
   {
     step: "01",
-    title: "A 15-minute call",
+    title: "A 30-minute call",
     body: "You tell us how the work actually runs.",
   },
   {
@@ -329,7 +329,7 @@ export const howWeWork = [
 export const contactEmail = "bookedtodone@gmail.com";
 
 /** Paste the Calendly / Cal.com URL here and every booking button goes live. */
-export const BOOKING_URL: string | null = null;
+export const BOOKING_URL: string | null = "https://calendly.com/bookedtodone/30min";
 
 export function mailtoFor(subject: string, prospect?: string) {
   const body = prospect ? `Hi Jerry,\n\nI'm with ${prospect}. ` : "Hi Jerry,\n\n";

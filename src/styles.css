@@ -182,13 +182,38 @@ button, a, input, select, textarea { touch-action: manipulation; }
  * ------------------------------------------------------------------------- */
 
 @theme {
-  --color-bd-blue: oklch(0.54 0.24 263);
-  --color-bd-blue-ink: oklch(0.41 0.19 263);
-  --color-bd-blue-soft: oklch(0.93 0.045 263);
-  --color-bd-navy: oklch(0.22 0.05 263);
-  --color-bd-navy-soft: oklch(0.28 0.06 263);
-  --color-bd-green: oklch(0.72 0.16 161);
-  --color-bd-paper: oklch(0.975 0.006 265);
+  /*
+   * Exact values from the Booked to Done palette (demo video v3, 15 Oct 2026).
+   * Hex on purpose here: these must match the video frame-for-frame, and hex is
+   * what the palette reference publishes.
+   *
+   * The `bd-blue*` / `bd-navy*` names are kept so the whole site didn't need
+   * renaming in one pass — they now carry the brand GREENS. Read them as
+   * "primary" and "ink".
+   */
+  --color-bd-blue: #176344; /* Brand green — buttons, links, selected states, logo */
+  --color-bd-blue-ink: #0f4a32; /* Deep green — hover/pressed on brand green */
+  --color-bd-blue-soft: #e2f1e8; /* Pale green — chips and soft fills */
+  --color-bd-navy: #102c23; /* Dark green — headlines, body, dark surfaces. Never pure black. */
+  --color-bd-navy-soft: #0f4a32; /* Deep green — hover on dark surfaces */
+  --color-bd-green: #16a34a; /* "Done" green — Auto chips, checkmarks, paid/approved ONLY */
+  --color-bd-paper: #e2f1e8; /* Pale green — tinted section backgrounds */
+
+  /* Supporting palette */
+  --color-bd-light: #cfe5d9; /* Light green — offset shadows behind phones and cards */
+  --color-bd-done-tint: #dcfce7; /* Background behind done states */
+  --color-bd-ai-from: #7c3aed; /* AI gradient start — AI moments only */
+  --color-bd-ai-to: #2563eb; /* AI gradient end */
+  --color-bd-problem: #ef4444; /* Problem red — the X beside a problem, nothing else */
+  --color-bd-body: #475569; /* Body grey — sub-headlines, supporting text */
+  --color-bd-mute: #94a3b8; /* Light grey — timestamps, unavailable slots */
+  --color-bd-line: #e2e8f0; /* Line grey — card borders and dividers */
+  --color-bd-chip: #f1f5f9; /* Chip grey — AI chat bubble, empty item chips */
+}
+
+/** AI moments always use the purple-to-blue gradient. */
+.bd-ai-gradient {
+  background-image: linear-gradient(135deg, var(--color-bd-ai-from), var(--color-bd-ai-to));
 }
 
 @keyframes bd-travel {
@@ -216,13 +241,13 @@ button, a, input, select, textarea { touch-action: manipulation; }
 
 @keyframes bd-pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 oklch(0.54 0.24 263 / 0.45);
+    box-shadow: 0 0 0 0 rgb(23 99 68 / 0.45);
   }
   70% {
-    box-shadow: 0 0 0 12px oklch(0.54 0.24 263 / 0);
+    box-shadow: 0 0 0 12px rgb(23 99 68 / 0);
   }
   100% {
-    box-shadow: 0 0 0 0 oklch(0.54 0.24 263 / 0);
+    box-shadow: 0 0 0 0 rgb(23 99 68 / 0);
   }
 }
 
@@ -291,4 +316,27 @@ button, a, input, select, textarea { touch-action: manipulation; }
     animation: none !important;
     opacity: 1;
   }
+}
+
+@keyframes bd-scan {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+.bd-scanline { animation: bd-scan 1.4s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .bd-scanline { animation: none; top: 50%; } }
+
+@keyframes bd-pill-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.bd-pill-in { animation: bd-pill-in 220ms cubic-bezier(0.22, 1, 0.36, 1); transform-origin: center bottom; }
+
+@keyframes bd-prompt-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.bd-prompt-in { animation: bd-prompt-in 200ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bd-pill-in, .bd-prompt-in { animation: none; }
 }

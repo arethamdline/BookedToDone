@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CalendarPlus, Home, UserRound } from "lucide-react";
-import { Brand } from "./brand";
+import { SampleCompanyBrand } from "./sample-company-brand";
 import { Button } from "./ui/button";
 import { CustomerAssistantProvider } from "./customer-assistant";
 
@@ -18,8 +18,8 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background text-foreground">
         <header className="sticky top-14 z-40 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 lg:px-8">
-            <Link to="/customer" aria-label="Booked to Done customer home" className="min-w-0">
-              <Brand className="[&>span:last-child]:hidden sm:[&>span:last-child]:inline" />
+            <Link to="/customer" aria-label="Sample company home" className="min-w-0">
+              <SampleCompanyBrand className="[&>span:last-child]:hidden sm:[&>span:last-child]:inline" />
             </Link>
             <nav className="hidden items-center gap-1 lg:flex">
               {items.map((i) => (

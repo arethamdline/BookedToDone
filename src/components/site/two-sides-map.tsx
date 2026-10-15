@@ -91,7 +91,7 @@ export function TwoSidesMap() {
           "hover:border-bd-blue hover:shadow-lg hover:shadow-bd-navy/5",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bd-blue focus-visible:ring-offset-2",
           isActive && "border-bd-blue shadow-lg shadow-bd-navy/5",
-          isPartner && "border-bd-green ring-1 ring-bd-green/40",
+          isPartner && "border-bd-blue ring-1 ring-bd-blue/40",
           dimmed && "opacity-45",
           !showOnMobile && "hidden lg:block",
         )}
@@ -107,7 +107,7 @@ export function TwoSidesMap() {
           See it work <ArrowRight className="size-3" />
         </span>
         {isPartner && (
-          <span className="absolute -top-2 right-3 rounded-full bg-bd-green px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+          <span className="absolute -top-2 right-3 rounded-full bg-bd-blue px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
             lands here
           </span>
         )}
@@ -167,7 +167,7 @@ export function TwoSidesMap() {
                 className="bd-dash text-bd-blue"
                 strokeLinecap="round"
               />
-              <circle r="4.5" fill="currentColor" className="text-bd-green">
+              <circle r="4.5" fill="currentColor" className="text-bd-blue">
                 <animateMotion dur="1.1s" repeatCount="indefinite" path={path} />
               </circle>
             </>

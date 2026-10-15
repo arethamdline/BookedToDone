@@ -1,7 +1,7 @@
 import type { Pricing } from "./mock-data";
 
 export const company = {
-  name: "BookedToDone Demo",
+  name: "Sample Junk Co.",
   city: "Austin",
   state: "TX",
   serviceZips: ["78701", "78702", "78703", "78704", "78705", "78745", "78756"],
@@ -11,6 +11,8 @@ export const company = {
     sunday: "Sunday, closed",
   },
   sameDaySurcharge: 25,
+  /** Held at booking and credited against the final bill. */
+  deposit: 50,
   trucks: [
     { name: "Pickup", capacity: "small item loads" },
     { name: "Box truck", capacity: "up to 16 cubic yards" },

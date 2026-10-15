@@ -20,6 +20,9 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { StatusBadge } from "./status-badge";
 import { BookingPhotos } from "./booking-photos";
+import { PhotoEstimateStep } from "./photo-estimate-step";
+import { DepositStep } from "./deposit-step";
+import { company } from "@/data/company";
 import {
   blankJob,
   dateLabel,
@@ -53,7 +56,8 @@ export function JunkBookingForm({
     source: initial?.source ?? (manual ? "Phone" : "Website"),
     submissionKey: initial?.submissionKey || crypto.randomUUID(),
   }));
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(manual ? 1 : 0);
+  const [extraItem, setExtraItem] = useState("");
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<Job | null>(null);
   const [category, setCategory] = useState("Furniture");
@@ -61,13 +65,38 @@ export function JunkBookingForm({
   const submitting = useRef(false);
   const set = <K extends keyof Job>(key: K, value: Job[K]) =>
     setJob((j) => ({ ...j, [key]: value }));
+  const [extraNote, setExtraNote] = useState("");
+  const addExtraItem = () => {
+    const raw = extraItem.trim();
+    if (!raw) return;
+    const qty = Number(raw.match(/\d+/)?.[0] ?? 1) || 1;
+    const words = raw.toLowerCase().replace(/\d+/g, "").trim();
+    const match = data.pricing.items.find(
+      (i) => words.includes(i.name.toLowerCase()) || i.name.toLowerCase().includes(words),
+    );
+    if (match) {
+      setJob((j) => ({ ...j, items: { ...j.items, [match.id]: (j.items[match.id] || 0) + qty } }));
+      setExtraNote(`Added ${qty} × ${match.name}.`);
+    } else {
+      setJob((j) => ({ ...j, otherItem: [j.otherItem, raw].filter(Boolean).join(", ") }));
+      setExtraNote(`"${raw}" isn't on the price list — staff will quote it.`);
+    }
+    setExtraItem("");
+  };
   const q = quote(job, data.pricing);
-  const labels = ["What needs to go?", "Pickup details", "Contact & schedule", "Review & request"];
+  const labels = [
+    "Photo estimate",
+    "Did we miss anything?",
+    "Pickup details",
+    "Contact & schedule",
+    "Review & request",
+  ];
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (submitting.current || busy) return;
     setError("");
-    if (step === 0) {
+    // step 1 — confirm the item list the photo scan produced
+    if (step === 1) {
       if (
         job.mode === "custom"
           ? !job.project.trim()
@@ -80,10 +109,11 @@ export function JunkBookingForm({
         );
         return;
       }
-      setStep(1);
+      setStep(2);
       return;
     }
-    if (step === 1) {
+    // step 2 — pickup details
+    if (step === 2) {
       if (
         job.access.startsWith("Upstairs") &&
         (!Number.isInteger(job.floor) || job.floor < 1 || job.floor > 100)
@@ -91,7 +121,7 @@ export function JunkBookingForm({
         setError("Enter a floor number from 1 to 100.");
         return;
       }
-      setStep(2);
+      setStep(3);
       return;
     }
     const invalid = validateJob(job, data.pricing);
@@ -99,8 +129,8 @@ export function JunkBookingForm({
       setError(invalid);
       return;
     }
-    if (step === 2) {
-      setStep(3);
+    if (step === 3) {
+      setStep(4);
       return;
     }
     submitting.current = true;
@@ -150,40 +180,26 @@ export function JunkBookingForm({
       zip: previous?.zip ?? "",
     }));
   };
+  // A saved booking now goes to the deposit, which confirms it. Manual
+  // (staff-entered) bookings skip payment — the office isn't taking a card.
   if (saved)
-    return (
+    return manual ? (
       <Card>
         <CardContent className="space-y-5 p-6 text-center">
           <CheckCircle2 className="mx-auto size-12 text-primary" />
           <h2 className="font-display text-2xl font-bold">
-            {initial?.id
-              ? "Booking updated"
-              : isCustom(saved)
-                ? "Quote request received!"
-                : "Pickup request received!"}
+            {initial?.id ? "Booking updated" : "Booking created"}
           </h2>
           <p className="font-semibold">
             {saved.id} <StatusBadge>{saved.status}</StatusBadge>
           </p>
-          <p>
-            {saved.street}, {saved.city}, {saved.state} {saved.zip}
-            <br />
-            {dateLabel(saved.date)} · {saved.window}
-          </p>
-          <p className="text-2xl font-bold">
-            {saved.estimate == null
-              ? "Our team will prepare your quote"
-              : `${money(saved.estimate)} estimated`}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Email confirmation simulated. Staff will review your request and confirm availability.
-            Final pricing is agreed after on-site inspection.
-          </p>
           <Button asChild>
-            <Link to="/portal">View my bookings</Link>
+            <Link to="/staff">Back to the dashboard</Link>
           </Button>
         </CardContent>
       </Card>
+    ) : (
+      <DepositStep job={saved} deposit={company.deposit} />
     );
   return (
     <form onSubmit={submit} className="space-y-6 pb-14 lg:pb-0">
@@ -214,12 +230,55 @@ export function JunkBookingForm({
           {error || storeError}
         </p>
       )}
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_310px]">
+      <div className="grid items-start gap-6">
         <Card>
           <CardContent className="space-y-6 p-5 sm:p-6">
             {step === 0 && (
+              <PhotoEstimateStep
+                minimum={data.pricing.minimum}
+                onConfirm={(items, addMore) => {
+                  setJob((j) => ({ ...j, mode: "standard", items: { ...j.items, ...items } }));
+                  // "Looks right" skips the edit step entirely — only people who
+                  // say something is missing get sent there.
+                  setStep(addMore ? 1 : 2);
+                }}
+                onSkip={() => setStep(1)}
+              />
+            )}
+            {step === 1 && (
               <>
-                <h2 className="font-display text-2xl font-bold">What needs to go?</h2>
+                <h2 className="font-display text-2xl font-bold">Did we miss anything?</h2>
+                <p className="-mt-3 text-sm text-muted-foreground">
+                  Add or remove anything before we price it. Nothing is booked yet.
+                </p>
+
+                {/* Type what the photo missed — matches the price list where it can. */}
+                <div className="rounded-xl border bg-accent/40 p-4">
+                  <label htmlFor="missed-item" className="text-sm font-semibold">
+                    Something the photo missed?
+                  </label>
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      id="missed-item"
+                      value={extraItem}
+                      onChange={(e) => setExtraItem(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addExtraItem();
+                        }
+                      }}
+                      placeholder="e.g. mattress, fridge, 3 bags"
+                      className="h-11 flex-1 rounded-md border bg-background px-3 text-sm"
+                    />
+                    <Button type="button" variant="outline" onClick={addExtraItem}>
+                      <Plus className="size-4" /> Add
+                    </Button>
+                  </div>
+                  {extraNote && (
+                    <p className="mt-2 text-xs font-medium text-primary">{extraNote}</p>
+                  )}
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {(["standard", "custom"] as const).map((mode) => (
                     <button
@@ -376,7 +435,7 @@ export function JunkBookingForm({
                 </p>
               </>
             )}
-            {step === 1 && (
+            {step === 2 && (
               <>
                 <h2 className="font-display text-2xl font-bold">Pickup details</h2>
                 <fieldset>
@@ -464,7 +523,7 @@ export function JunkBookingForm({
                 </p>
               </>
             )}
-            {step === 2 && (
+            {step === 3 && (
               <>
                 <h2 className="font-display text-2xl font-bold">Contact & schedule</h2>
                 {manual && !initial?.id && (
@@ -594,12 +653,12 @@ export function JunkBookingForm({
               </>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <>
                 <h2 className="font-display text-2xl font-bold">Review & request</h2>
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">Items & pickup</h3>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setStep(0)}>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setStep(3)}>
                     Edit items
                   </Button>
                 </div>
@@ -663,52 +722,7 @@ export function JunkBookingForm({
             )}
           </CardContent>
         </Card>
-        <Card className="order-first lg:order-last lg:sticky lg:top-20">
-          <CardContent className="space-y-4 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Your pickup
-            </p>
-            <h3 className="font-display text-lg font-bold">Estimated Pickup Cost</h3>
-            {isCustom(job) ? (
-              <>
-                <p className="text-2xl font-bold">Staff quote needed</p>
-                <p className="text-sm text-muted-foreground">
-                  Our team will review your items and photos, then send a quote for your approval.
-                  No automatic price is shown.
-                </p>
-              </>
-            ) : (
-              <>
-                {Object.values(job.items).some((n) => n > 0) &&
-                  q.lines.map((l) => (
-                    <div key={l.label} className="flex justify-between gap-3 text-sm">
-                      <span className="text-muted-foreground">{l.label}</span>
-                      <strong>{money(l.amount)}</strong>
-                    </div>
-                  ))}
-                <p aria-live="polite" className="border-t pt-4 text-3xl font-bold">
-                  {Object.values(job.items).some((n) => n > 0)
-                    ? money(q.estimate)
-                    : `From ${money(data.pricing.minimum)}`}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Minimum pickup charge: {money(data.pricing.minimum)}. If your items total less, we
-                  add only the difference. Final pricing follows an on-site inspection.
-                </p>
-              </>
-            )}
-            {!isCustom(job) && job.items && (
-              <p className="text-xs text-muted-foreground">Based on the items you choose.</p>
-            )}
-          </CardContent>
-        </Card>
       </div>
-      {!manual && job.source === "Website" && (
-        <div className="fixed inset-x-0 bottom-16 z-40 flex items-center justify-between border-t bg-background/95 px-4 py-3 text-sm shadow-sm backdrop-blur lg:hidden">
-          <span>Estimated Pickup Cost</span>
-          <strong>{isCustom(job) ? "Staff quote needed" : money(q.estimate)}</strong>
-        </div>
-      )}
       <div className="flex justify-between gap-3">
         {step > 0 ? (
           <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
@@ -719,7 +733,7 @@ export function JunkBookingForm({
           <span />
         )}
         <Button size="lg" disabled={!ready || busy} type="submit">
-          {step === 3 ? (initial?.id ? "Save changes" : "Request Pickup") : "Continue"}
+          {step === 4 ? (initial?.id ? "Save changes" : "Request Pickup") : "Continue"}
           <ArrowRight />
         </Button>
       </div>

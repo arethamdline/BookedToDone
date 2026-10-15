@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 import { SiteHeader, SiteFooter } from "@/components/site/site-chrome";
 import { FlowHero } from "@/components/site/flow-hero";
 import { TwoSidesMap } from "@/components/site/two-sides-map";
 import { DemoVideo } from "@/components/site/demo-video";
-import { bookingHrefFor, entryPaths, howWeWork, mailtoFor, problems } from "@/data/site-content";
+import { bookingHrefFor, entryPaths, getFeature, howWeWork, problems } from "@/data/site-content";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
 
 export const Route = createFileRoute("/")({
@@ -48,45 +48,35 @@ function LandingPage() {
       <section className="border-b border-bd-navy/10 bg-gradient-to-b from-bd-paper to-white">
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <SectionLabel>
-              {prospect ? `Built for ${prospect}` : "AI booking + operations"}
-            </SectionLabel>
-            <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.5rem] lg:text-[2.9rem]">
-              Your customers book.
-              <br />
-              Your crew gets it done.
-              <br />
-              <span className="text-bd-blue">Nothing typed twice.</span>
+            <h1 className="font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-tight text-balance text-bd-navy sm:text-[2.6rem] lg:text-[3rem]">
+              {prospect ? `${prospect}, your ` : "Your "}customers book, your crew gets it done, and{" "}
+              <span className="text-bd-blue">nothing gets typed twice.</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-bd-body sm:text-base">
               We build custom AI booking and operations systems for owner-run service businesses.
               The customer side fills the office side on its own — no re-keying, no lost jobs, no 9
               pm phone calls you never got.
             </p>
 
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
               <a
-                href={bookingHrefFor("15-min call — Booked to Done", prospect)}
-                aria-label="Book a meeting at a time that suits you"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-bd-blue px-5 py-3 text-[15px] font-bold leading-tight text-white transition-colors hover:bg-bd-blue-ink"
+                href={bookingHrefFor("30-min call — Booked to Done", prospect)}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-bd-blue px-6 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink"
               >
-                Book a meeting at a time that suits you <ArrowRight className="size-4 shrink-0" />
+                Book a meeting <ArrowRight className="size-4 shrink-0" />
               </a>
               <Link
                 to="/demo"
                 search={search}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 px-5 text-[15px] font-semibold text-bd-navy transition-colors hover:bg-bd-paper"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 px-6 text-[15px] font-semibold text-bd-navy transition-colors hover:bg-bd-paper"
               >
-                See it all connected
+                See the demo
               </Link>
             </div>
 
-            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-              The team will set up a meeting to learn exactly what your problem is and suggest
-              solutions.
-            </p>
-            <p className="mt-5 text-sm font-semibold text-bd-navy">
-              Live in 7 days · built around how you already work · you only pay for what you need
+            <p className="mx-auto mt-4 max-w-xl text-sm text-bd-body">
+              Pick a time that suits you. We'll learn exactly what your problem is, then suggest
+              what would fix it.
             </p>
           </div>
         </div>
@@ -116,20 +106,32 @@ function LandingPage() {
           <p className="mt-1.5 text-sm text-muted-foreground">
             Tap the one that costs you most — it opens the piece that fixes it.
           </p>
-          <ul className="mt-5 flex flex-wrap gap-2">
-            {problems.map((problem) => (
-              <li key={problem.slug}>
-                <Link
-                  to="/features/$slug"
-                  params={{ slug: problem.slug }}
-                  search={search}
-                  className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-bd-navy/15 bg-white px-4 text-sm font-semibold text-bd-navy transition-all hover:border-bd-blue hover:bg-bd-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bd-blue focus-visible:ring-offset-2"
-                >
-                  {problem.label}
-                  <ArrowRight className="size-3.5 text-bd-blue transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </li>
-            ))}
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {problems.map((problem) => {
+              const fix = getFeature(problem.slug);
+              return (
+                <li key={problem.slug}>
+                  <Link
+                    to="/features/$slug"
+                    params={{ slug: problem.slug }}
+                    search={search}
+                    className="group flex h-full flex-col justify-between gap-3 rounded-xl border border-bd-line bg-white p-4 transition-all hover:border-bd-blue hover:shadow-lg hover:shadow-bd-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bd-blue focus-visible:ring-offset-2"
+                  >
+                    {/* red is reserved for exactly this: marking the problem */}
+                    <span className="flex items-start gap-2">
+                      <X className="mt-0.5 size-4 shrink-0 text-bd-problem" strokeWidth={3} />
+                      <span className="text-[15px] font-semibold leading-snug text-bd-navy">
+                        {problem.label}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 border-t border-bd-line pt-3 text-sm font-bold text-bd-blue">
+                      <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      <span className="truncate">{fix?.title}</span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -169,9 +171,9 @@ function LandingPage() {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {entryPaths.map((path, index) => {
               const recommended = index === 2;
-              const href = recommended
-                ? bookingHrefFor("The full system — Booked to Done", prospect)
-                : mailtoFor(`${path.title} — Booked to Done`, prospect);
+              // Every one of these books a meeting. "Talk about this" used to be a
+              // mailto, which on most machines did nothing at all.
+              const href = bookingHrefFor(`${path.title} — Booked to Done`, prospect);
 
               return (
                 <div
@@ -182,11 +184,6 @@ function LandingPage() {
                       : "border-bd-navy/10 bg-white"
                   }`}
                 >
-                  {recommended && (
-                    <span className="absolute -top-3 right-4 rounded-full bg-bd-blue px-3 py-1 text-[11px] font-bold text-white">
-                      Recommended
-                    </span>
-                  )}
                   <p
                     className={`text-[11px] font-bold uppercase tracking-wide ${recommended ? "text-white/70" : "text-bd-blue"}`}
                   >
@@ -204,10 +201,10 @@ function LandingPage() {
                   </p>
                   <a
                     href={href}
-                    className={`mt-4 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-4 text-sm font-bold ${
+                    className={`mt-5 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-4 text-sm font-bold transition-colors ${
                       recommended
-                        ? "bg-bd-blue text-white hover:bg-bd-blue-ink"
-                        : "text-bd-blue hover:underline"
+                        ? "bg-white text-bd-navy hover:bg-white/90"
+                        : "border border-bd-blue/30 text-bd-blue hover:bg-bd-blue-soft"
                     }`}
                   >
                     {recommended ? "Book a meeting" : "Talk about this"}
@@ -278,7 +275,7 @@ function LandingPage() {
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
               { name: "Jerry Huang", initials: "JH" },
-              { name: "Aretha Madeline", initials: "AB" },
+              { name: "Aretha Madeline Budiman", initials: "AB" },
             ].map((founder) => (
               <div
                 key={founder.name}
@@ -301,31 +298,37 @@ function LandingPage() {
       </section>
 
       {/* --------------------------------------------------- 8. Final CTA */}
-      <section className="bg-bd-navy">
-        <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-16">
-          <h2 className="mx-auto max-w-2xl font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-            {prospect
-              ? `${prospect}, see both ends of the job connected.`
-              : "See both ends of the job connected."}
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-white/65">
-            See a customer-facing site where a job starts and a staff-facing system where it lands.
-            Both ends stay connected.
-          </p>
-          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a
-              href={bookingHrefFor("15-min call — Booked to Done", prospect)}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-bd-blue px-6 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink sm:w-auto"
-            >
-              Book a meeting <ArrowRight className="size-4" />
-            </a>
-            <Link
-              to="/demo"
-              search={search}
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-white/20 px-6 text-[15px] font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
-            >
-              Play with the demo first
-            </Link>
+      {/*
+        Sits on pale ground as a contained card. It used to be a full-bleed dark
+        section directly above the dark footer, so the two read as one slab.
+      */}
+      <section className="bg-bd-paper">
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
+          <div className="rounded-3xl bg-bd-navy px-6 py-12 text-center sm:px-10 sm:py-14">
+            <h2 className="mx-auto max-w-2xl font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              {prospect
+                ? `${prospect}, see both ends of the job connected.`
+                : "See both ends of the job connected."}
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-white/70">
+              See a customer-facing site where a job starts and a staff-facing system where it
+              lands. Both ends stay connected.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href={bookingHrefFor("30-min call — Booked to Done", prospect)}
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-6 text-[15px] font-bold text-bd-navy transition-colors hover:bg-white/90 sm:w-auto"
+              >
+                Book a meeting <ArrowRight className="size-4" />
+              </a>
+              <Link
+                to="/demo"
+                search={search}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-white/25 px-6 text-[15px] font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
+              >
+                Play with the demo first
+              </Link>
+            </div>
           </div>
         </div>
       </section>

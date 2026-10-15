@@ -135,30 +135,61 @@ export function CustomerAssistantProvider({ children }: { children: ReactNode })
 
 export function CustomerAssistantCard() {
   const { ask } = useCustomerAssistant();
+  const [draft, setDraft] = useState("");
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = draft.trim();
+    if (!q) return;
+    setDraft("");
+    ask(q);
+  };
+
   return (
     <section className="rounded-lg border border-white/15 bg-background p-4 text-foreground shadow-2xl sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-sm font-bold">
-          <Bot className="size-5 text-primary" /> Ask BookedToDone Demo
+          <Bot className="size-5 text-primary" /> Ask {company.name}
         </span>
         <span className="rounded bg-accent-strong px-2 py-1 text-[10px] font-bold text-foreground">
           AI
         </span>
       </div>
-      <p className="mt-2 text-sm text-muted-foreground">Questions welcome, even after hours.</p>
-      <div className="mt-4 grid gap-2">
+      <p className="mt-2 text-sm text-muted-foreground">
+        Ask anything — it answers from this company's prices and service area.
+      </p>
+
+      <form onSubmit={submit} className="mt-3 flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Type your question…"
+          aria-label="Ask a question"
+          className="min-h-11 flex-1 rounded-md border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <button
+          type="submit"
+          disabled={!draft.trim()}
+          className="grid min-h-11 w-11 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground transition-opacity disabled:opacity-40"
+          aria-label="Send question"
+        >
+          <Send className="size-4" />
+        </button>
+      </form>
+
+      <p className="mt-3 text-xs font-semibold text-muted-foreground">Or try one of these</p>
+      <div className="mt-2 flex flex-wrap gap-2">
         {starters.map((question) => (
           <button
             key={question}
             type="button"
             onClick={() => ask(question)}
-            className="min-h-11 rounded-md border bg-background px-3 py-2 text-left text-sm font-medium transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-h-9 rounded-full border bg-background px-3 text-xs font-medium transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {question}
           </button>
         ))}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">Tap a question to start a chat.</p>
     </section>
   );
 }
@@ -278,14 +309,135 @@ function CustomerAssistantWidget({
           </button>
         </div>
       )}
+      <AssistantLauncher open={open} openChat={openChat} closeChat={closeChat} ask={ask} />
+    </>
+  );
+}
+
+const FAB_TUCKED_KEY = "bd-assistant-tucked";
+
+/**
+ * The launcher used to be an anonymous chat bubble in the corner — nothing
+ * about it said "there is an AI here that knows our prices", so nobody pressed
+ * it. Now it sits centre-bottom as a robot with a question rotating beside it,
+ * and tucks away small to the side if the visitor would rather it didn't.
+ */
+function AssistantLauncher({
+  open,
+  openChat,
+  closeChat,
+  ask,
+}: {
+  open: boolean;
+  openChat: () => void;
+  closeChat: () => void;
+  ask: (q: string) => void;
+}) {
+  const [tucked, setTucked] = useState(false);
+  const [peeking, setPeeking] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    try {
+      setTucked(localStorage.getItem(FAB_TUCKED_KEY) === "1");
+    } catch {
+      /* blocked storage — just show it */
+    }
+  }, []);
+
+  const setTuckedPersisted = (value: boolean) => {
+    setTucked(value);
+    try {
+      localStorage.setItem(FAB_TUCKED_KEY, value ? "1" : "0");
+    } catch {
+      /* non-fatal */
+    }
+  };
+
+  // Rotate the suggestion so the robot always looks like it has something to say.
+  useEffect(() => {
+    if (open || tucked) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % starters.length), 1500);
+    return () => clearInterval(id);
+  }, [open, tucked]);
+
+  if (open) {
+    return (
       <button
         type="button"
-        onClick={open ? closeChat : openChat}
-        aria-label={open ? "Close AI chat" : "Open AI chat"}
+        onClick={closeChat}
+        aria-label="Close AI chat"
         className="fixed bottom-20 right-3 z-[70] grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
       >
-        {open ? <X className="size-6" /> : <MessageCircle className="size-6" />}
+        <X className="size-6" />
       </button>
-    </>
+    );
+  }
+
+  if (tucked && !peeking) {
+    return (
+      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[70] flex justify-center px-3 lg:bottom-6">
+        <button
+          type="button"
+          // Opens on hover so it never needs a click; the click path stays for
+          // touch, where there is no hover.
+          onMouseEnter={() => setPeeking(true)}
+          onFocus={() => setPeeking(true)}
+          onClick={() => setTuckedPersisted(false)}
+          aria-label="Show the AI assistant"
+          className="pointer-events-auto grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Bot className="size-5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    // pointer-events-none on the full-width wrapper: it used to sit on top of the
+    // demo guide's "Show me around" pill and swallow its clicks.
+    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[70] flex justify-center px-3 lg:bottom-6">
+      <div
+        onMouseLeave={() => {
+          // a hover-peek closes again on its own; a deliberately opened one stays
+          if (tucked) setPeeking(false);
+        }}
+        className="bd-pill-in pointer-events-auto flex w-[21rem] max-w-full items-center gap-1.5 rounded-full border bg-background p-1.5 shadow-xl"
+      >
+        <button
+          type="button"
+          onClick={openChat}
+          aria-label="Open AI chat"
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-primary pl-2.5 pr-3 text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Bot className="size-5" />
+          <span className="text-[10px] font-bold uppercase tracking-wide">AI</span>
+        </button>
+
+        {/* fixed-width, single-line: the pill must not resize as prompts rotate */}
+        <button
+          type="button"
+          onClick={() => ask(starters[index]!)}
+          className="min-w-0 flex-1 truncate rounded-full px-1 py-1.5 text-left text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {/* keyed so each prompt fades in rather than snapping */}
+          <span key={index} className="bd-prompt-in block truncate">
+            {starters[index]}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setPeeking(false);
+            setTuckedPersisted(true);
+          }}
+          aria-label="Tuck the assistant away"
+          className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+    </div>
   );
 }

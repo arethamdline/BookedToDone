@@ -1,22 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { Truck } from "lucide-react";
 
 import { bookingHrefFor, contactEmail } from "@/data/site-content";
 import { prospectSearch, useProspect } from "@/lib/prospect";
 import { cn } from "@/lib/utils";
 
-/** The Booked to Done wordmark. Swap for the SVG kit when `/brand/` lands. */
+/**
+ * The Booked to Done lockup — the real `bd` mark plus the wordmark.
+ *
+ * Assets live in `public/brand/` and are documented in `brand/README.md`. They
+ * are PNGs cropped from the supplied logo sheet; if the original vector turns
+ * up, swap the `src` for an `.svg` and this component needs no other change.
+ */
 export function SiteBrand({ className, invert }: { className?: string; invert?: boolean }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <span
-        className={cn(
-          "grid size-8 shrink-0 place-items-center rounded-lg",
-          invert ? "bg-white text-bd-navy" : "bg-bd-blue text-white",
-        )}
-      >
-        <Truck className="size-[18px]" />
-      </span>
+      <img
+        src={invert ? "/brand/bd-mark-white.png" : "/brand/bd-mark.png"}
+        alt=""
+        aria-hidden="true"
+        width="347"
+        height="294"
+        className="h-7 w-auto shrink-0"
+      />
       <span
         className={cn(
           "font-display text-[15px] font-extrabold tracking-tight",
@@ -43,7 +48,7 @@ export function SiteHeader() {
         <nav className="ml-auto flex items-center gap-1 sm:gap-2">
           <a
             href="#system"
-            className="hidden min-h-11 items-center rounded-md px-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-bd-navy sm:inline-flex"
+            className="hidden min-h-11 items-center rounded-md px-3 text-sm font-semibold text-bd-navy transition-colors hover:bg-bd-paper sm:inline-flex"
           >
             What it does
           </a>
@@ -56,11 +61,12 @@ export function SiteHeader() {
             <span className="hidden sm:inline">See the demo</span>
           </Link>
           <a
-            href={bookingHrefFor("15-min call — Booked to Done", prospect)}
+            href={bookingHrefFor("30-min call — Booked to Done", prospect)}
             aria-label="Book a meeting at a time that suits you"
-            className="inline-flex min-h-11 items-center rounded-lg bg-bd-blue px-3 text-[13px] font-bold text-white transition-colors hover:bg-bd-blue-ink sm:px-4 sm:text-sm"
+            className="inline-flex min-h-11 items-center whitespace-nowrap rounded-lg bg-bd-blue px-3 text-[13px] font-bold text-white transition-colors hover:bg-bd-blue-ink sm:px-4 sm:text-sm"
           >
-            Book a meeting
+            <span className="sm:hidden">Book</span>
+            <span className="hidden sm:inline">Book a meeting</span>
           </a>
         </nav>
       </div>
@@ -84,7 +90,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col gap-2 text-sm">
           <Link to="/demo" search={search} className="font-semibold text-white hover:underline">
-            See it all connected
+            See the demo
           </Link>
           <a href={`mailto:${contactEmail}`} className="text-white/65 hover:text-white">
             {contactEmail}

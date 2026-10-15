@@ -69,7 +69,7 @@ export const Route = createFileRoute("/assistant/$threadId")({
   head: () => ({
     meta: [
       { title: "AI assistant — Booked to Done" },
-      { name: "description", content: "Junk removal help from the BookedToDone Demo assistant." },
+      { name: "description", content: "Junk removal help from the Sample Junk Co. assistant." },
       { property: "og:title", content: "AI assistant — Booked to Done" },
       { property: "og:description", content: "Junk removal estimates and booking help." },
       { property: "og:type", content: "website" },
@@ -563,7 +563,7 @@ function AssistantPage() {
                     bookingId: j.id,
                     customer: j.name,
                     contact: j.email,
-                    messages: [...c.messages, message("bot", "Smart-Junk", confirmation)],
+                    messages: [...c.messages, message("bot", "Sample Junk Co.", confirmation)],
                   }));
 
                 setThreads((ts) =>

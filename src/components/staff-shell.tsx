@@ -120,9 +120,6 @@ export function StaffShell({ page, children }: { page: string; children: ReactNo
               <span className="font-semibold text-foreground">{page}</span>
             </p>
           </div>
-          <span className="hidden rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide text-muted-foreground sm:block">
-            PROTOTYPE
-          </span>
           <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
             SC
           </span>

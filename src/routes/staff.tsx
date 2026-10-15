@@ -58,7 +58,7 @@ export const Route = createFileRoute("/staff")({
   validateSearch: (s: Record<string, unknown>): { section?: string } => ({
     section: typeof s["section"] === "string" ? s["section"] : "Overview",
   }),
-  head: () => ({ meta: [{ title: "Operations — Smart-Junk" }] }),
+  head: () => ({ meta: [{ title: "Operations — Sample Junk Co." }] }),
   component: Staff,
 });
 function Staff() {
@@ -84,7 +84,7 @@ function Staff() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Smart-Junk operations
+              Sample Junk Co. operations
             </p>
             <h1 className="font-display text-3xl font-bold">{page}</h1>
           </div>
