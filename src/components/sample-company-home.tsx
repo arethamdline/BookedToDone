@@ -72,7 +72,7 @@ export function SampleCompanyHome() {
                 size="xl"
                 className="mt-6 w-full bg-orange-500 text-white hover:bg-orange-600 sm:w-auto"
               >
-                <Link to="/book">
+                <Link to="/book" data-tour="photo-cta">
                   Get a photo estimate <ArrowRight />
                 </Link>
               </Button>

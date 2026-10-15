@@ -65,7 +65,7 @@ export function StaffInsights({ jobs }: { jobs: Job[] }) {
   return (
     <div className="space-y-4">
       {/* AI weekly summary — written from the numbers below, not invented */}
-      <Card className="overflow-hidden">
+      <Card data-tour="ai-summary" className="overflow-hidden">
         <div className="bd-ai-gradient px-5 py-2">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-white">
             <Sparkles className="size-3.5" /> AI summary · this week

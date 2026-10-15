@@ -345,3 +345,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) {
   .bd-pill-in, .bd-prompt-in { animation: none; }
 }
+
+/* The guided tour owns the screen while it is open. */
+:root[data-guide="open"] .bd-launcher {
+  display: none;
+}

@@ -120,7 +120,7 @@ export function PhotoEstimateStep({
     return (
       <div className="space-y-5">
         <Header />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div data-tour="photo-samples" className="grid gap-3 sm:grid-cols-2">
           {SAMPLES.map((s, i) => (
             <button
               key={s.src}

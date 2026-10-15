@@ -147,7 +147,10 @@ export function CustomerAssistantCard() {
   };
 
   return (
-    <section className="rounded-lg border border-white/15 bg-background p-4 text-foreground shadow-2xl sm:p-5">
+    <section
+      data-tour="assistant-card"
+      className="rounded-lg border border-white/15 bg-background p-4 text-foreground shadow-2xl sm:p-5"
+    >
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-sm font-bold">
           <span className="bd-ai-gradient grid size-7 place-items-center rounded-md text-white">
@@ -420,7 +423,10 @@ function AssistantLauncher({
 
   if (collapsed) {
     return (
-      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[70] flex justify-center px-3 lg:bottom-6">
+      <div
+        style={{ bottom: "calc(var(--bd-guide-h, 0px) + 5.5rem)" }}
+        className="bd-launcher pointer-events-none fixed inset-x-0 z-[68] flex justify-center px-3"
+      >
         <button
           type="button"
           // Opens on hover so it never needs a click; the click path stays for
@@ -440,7 +446,10 @@ function AssistantLauncher({
   return (
     // pointer-events-none on the full-width wrapper: it used to sit on top of the
     // demo guide's "Show me around" pill and swallow its clicks.
-    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[70] flex justify-center px-3 lg:bottom-6">
+    <div
+      style={{ bottom: "calc(var(--bd-guide-h, 0px) + 5.5rem)" }}
+      className="bd-launcher pointer-events-none fixed inset-x-0 z-[68] flex justify-center px-3"
+    >
       <div
         onMouseLeave={() => {
           // a hover-peek closes again on its own; a deliberately opened one stays
