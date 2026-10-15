@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Your customers book. Your crew gets it done. Nothing typed twice. Custom AI booking and operations systems for owner-run service businesses.",
+          "Book more jobs, do less paperwork. Custom AI booking and operations systems for owner-run service businesses.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Booked to Done" },
@@ -49,13 +49,13 @@ function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance font-display text-[2.2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.9rem] lg:text-[3.4rem]">
-              {prospect ? `${prospect}, stop being the ` : "Stop being the "}
-              <span className="text-bd-blue">bottleneck</span> in your own business.
+              {prospect ? `${prospect}, book more jobs. ` : "Book more jobs. "}
+              <span className="text-bd-blue">Do less paperwork.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-bd-body sm:text-base">
-              We build AI booking and operations systems for owner-run service businesses. Customers
-              book themselves, jobs arrive in your office already filled in, and the admin stops
-              landing on you at 9 pm.
+              The AI answers every call and books the job — even at 9 pm. It arrives in your office
+              already filled in, so nobody types it up twice. Built around how your business already
+              runs.
             </p>
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
