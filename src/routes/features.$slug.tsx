@@ -2,8 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, CornerDownRight } from "lucide-react";
 
 import { SiteHeader, SiteFooter } from "@/components/site/site-chrome";
-import { PhoneFrame, LaptopFrame } from "@/components/site/device-frame";
-import { MiniAssistant, MiniCustomerQuote, MiniJobCard } from "@/components/site/mini-screens";
+import { FeatureDemo } from "@/components/site/feature-demo";
 import { features, getFeature, getPartner, mailtoFor, type Feature } from "@/data/site-content";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
 
@@ -25,44 +24,6 @@ export const Route = createFileRoute("/features/$slug")({
   }),
   component: FeaturePage,
 });
-
-/**
- * Placeholder for the interactive demo of a single feature.
- *
- * TODO: each slug gets its own 3–5 tap interaction (the detailed specs live in
- * the demo-app brief). Until then the frame shows the matching static screen so
- * the page is honest about what it is rather than faking an interaction.
- */
-function FeatureStage({ slug, frame }: { slug: string; frame: "phone" | "laptop" }) {
-  const screen =
-    slug === "ai-assistant" || slug === "inbox" ? (
-      <MiniAssistant />
-    ) : frame === "phone" ? (
-      <MiniCustomerQuote />
-    ) : (
-      <MiniJobCard />
-    );
-
-  const stage =
-    frame === "phone" ? (
-      <PhoneFrame className="mx-auto w-[14rem]">
-        <div className="h-[26rem]">{screen}</div>
-      </PhoneFrame>
-    ) : (
-      <LaptopFrame className="mx-auto w-full max-w-[26rem]">
-        <div className="h-[18rem]">{screen}</div>
-      </LaptopFrame>
-    );
-
-  return (
-    <div className="relative rounded-2xl border border-bd-navy/10 bg-bd-paper p-6 sm:p-8">
-      <span className="absolute left-4 top-4 rounded bg-bd-navy/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-        Interactive demo coming
-      </span>
-      <div className="pt-6">{stage}</div>
-    </div>
-  );
-}
 
 function FeaturePage() {
   const { feature } = Route.useLoaderData();
@@ -130,7 +91,7 @@ function FeaturePage() {
 
           {/* Right: the thing itself */}
           <div>
-            <FeatureStage slug={feature.slug} frame={feature.frame} />
+            <FeatureDemo slug={feature.slug} frame={feature.frame} />
           </div>
         </div>
 
