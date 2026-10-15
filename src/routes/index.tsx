@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { SiteHeader, SiteFooter } from "@/components/site/site-chrome";
 import { FlowHero } from "@/components/site/flow-hero";
 import { TwoSidesMap } from "@/components/site/two-sides-map";
 import { DemoVideo } from "@/components/site/demo-video";
-import { entryPaths, howWeWork, mailtoFor, problems } from "@/data/site-content";
+import { bookingHrefFor, entryPaths, howWeWork, mailtoFor, problems } from "@/data/site-content";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
 
 export const Route = createFileRoute("/")({
@@ -46,56 +46,72 @@ function LandingPage() {
 
       {/* ------------------------------------------------ 1. Company first */}
       <section className="border-b border-bd-navy/10 bg-gradient-to-b from-bd-paper to-white">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
-            <div>
-              <SectionLabel>
-                {prospect ? `Built for ${prospect}` : "AI booking + operations"}
-              </SectionLabel>
-              <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.5rem] lg:text-[2.9rem]">
-                Your customers book.
-                <br />
-                Your crew gets it done.
-                <br />
-                <span className="text-bd-blue">Nothing typed twice.</span>
-              </h1>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                We build custom AI booking and operations systems for owner-run service businesses.
-                The customer side fills the office side on its own — no re-keying, no lost jobs, no
-                9 pm phone calls you never got.
-              </p>
+        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionLabel>
+              {prospect ? `Built for ${prospect}` : "AI booking + operations"}
+            </SectionLabel>
+            <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight text-bd-navy sm:text-[2.5rem] lg:text-[2.9rem]">
+              Your customers book.
+              <br />
+              Your crew gets it done.
+              <br />
+              <span className="text-bd-blue">Nothing typed twice.</span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+              We build custom AI booking and operations systems for owner-run service businesses.
+              The customer side fills the office side on its own — no re-keying, no lost jobs, no 9
+              pm phone calls you never got.
+            </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a
-                  href={mailtoFor("15-min call — Booked to Done", prospect)}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-bd-blue px-5 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink"
-                >
-                  Book a 15-min call <ArrowRight className="size-4" />
-                </a>
-                <Link
-                  to="/demo"
-                  search={search}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 px-5 text-[15px] font-semibold text-bd-navy transition-colors hover:bg-bd-paper"
-                >
-                  See it all connected
-                </Link>
-              </div>
-
-              <p className="mt-5 text-xs text-muted-foreground">
-                Live in 7 days · 30-day pilot · setup refunded if it doesn't book the jobs
-              </p>
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
+              <a
+                href={bookingHrefFor("15-min call — Booked to Done", prospect)}
+                aria-label="Book a meeting at a time that suits you"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-bd-blue px-5 py-3 text-[15px] font-bold leading-tight text-white transition-colors hover:bg-bd-blue-ink"
+              >
+                Book a meeting at a time that suits you <ArrowRight className="size-4 shrink-0" />
+              </a>
+              <Link
+                to="/demo"
+                search={search}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-bd-navy/15 px-5 text-[15px] font-semibold text-bd-navy transition-colors hover:bg-bd-paper"
+              >
+                See it all connected
+              </Link>
             </div>
 
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+              The team will set up a meeting to learn exactly what your problem is and suggest
+              solutions.
+            </p>
+            <p className="mt-5 text-sm font-semibold text-bd-navy">
+              Live in 7 days · built around how you already work · you only pay for what you need
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------- 2. Diagram */}
+      <section className="border-b border-bd-navy/10 bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <SectionLabel>The connected flow</SectionLabel>
+            <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
+              One booking fills the office side.
+            </h2>
+          </div>
+          <div className="mt-8">
             <FlowHero />
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------------ 2. Problems */}
+      {/* ------------------------------------------------------ 3. Problems */}
       <section className="border-b border-bd-navy/10 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
           <h2 className="font-display text-xl font-bold text-bd-navy sm:text-2xl">
-            You already know where the money leaks out.
+            Your issues, and what fixes them.
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Tap the one that costs you most — it opens the piece that fixes it.
@@ -118,17 +134,17 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ------------------------------------------- 3. One system, two sides */}
+      {/* -------------------------------------------------------- 4. Features */}
       <section id="system" className="scroll-mt-16 border-b border-bd-navy/10 bg-bd-paper">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-2xl text-center">
-            <SectionLabel>One system, two sides</SectionLabel>
+            <SectionLabel>What we build</SectionLabel>
             <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
-              Twelve pieces. One set of data.
+              Everything we offer, on both sides of the job.
             </h2>
             <p className="mt-3 text-[15px] text-muted-foreground">
-              What your customer does on the left lands on the right by itself. Hover any tile to
-              see which half of your day it feeds.
+              These are the customer-side and staff-side features. Each one feeds its partner on the
+              other side.
             </p>
           </div>
 
@@ -138,7 +154,78 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* -------------------------------------------------- 4. Watch it run */}
+      {/* --------------------------------------------- 5. Start where it hurts */}
+      <section className="border-b border-bd-navy/10 bg-bd-paper">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <SectionLabel>Start where it hurts</SectionLabel>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-extrabold tracking-tight text-bd-blue sm:text-4xl">
+            You only pay for what you need.
+          </h2>
+          <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+            Start with one feature, connect the tools you have, or build the full system around your
+            work.
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {entryPaths.map((path, index) => {
+              const recommended = index === 2;
+              const href = recommended
+                ? bookingHrefFor("The full system — Booked to Done", prospect)
+                : mailtoFor(`${path.title} — Booked to Done`, prospect);
+
+              return (
+                <div
+                  key={path.title}
+                  className={`relative flex flex-col rounded-xl border p-5 ${
+                    recommended
+                      ? "border-bd-blue bg-bd-navy text-white shadow-xl shadow-bd-navy/20 ring-2 ring-bd-blue"
+                      : "border-bd-navy/10 bg-white"
+                  }`}
+                >
+                  {recommended && (
+                    <span className="absolute -top-3 right-4 rounded-full bg-bd-blue px-3 py-1 text-[11px] font-bold text-white">
+                      Recommended
+                    </span>
+                  )}
+                  <p
+                    className={`text-[11px] font-bold uppercase tracking-wide ${recommended ? "text-white/70" : "text-bd-blue"}`}
+                  >
+                    {path.detail}
+                  </p>
+                  <h3
+                    className={`mt-2 font-display text-lg font-bold ${recommended ? "text-white" : "text-bd-navy"}`}
+                  >
+                    {path.title}
+                  </h3>
+                  <p
+                    className={`mt-2 flex-1 text-sm leading-relaxed ${recommended ? "text-white/75" : "text-muted-foreground"}`}
+                  >
+                    {path.body}
+                  </p>
+                  <a
+                    href={href}
+                    className={`mt-4 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-4 text-sm font-bold ${
+                      recommended
+                        ? "bg-bd-blue text-white hover:bg-bd-blue-ink"
+                        : "text-bd-blue hover:underline"
+                    }`}
+                  >
+                    {recommended ? "Book a meeting" : "Talk about this"}
+                    <ArrowRight className="size-3.5" />
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-5 text-sm text-muted-foreground">
+            We connect your calendar, your website and your payment processor — whichever ones you
+            already pay for.
+          </p>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------- 6. Demo */}
       <section className="border-b border-bd-navy/10 bg-white">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-12">
           <div>
@@ -147,9 +234,9 @@ function LandingPage() {
               One job, start to finish, in 64 seconds.
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-              A photo becomes a $289–349 quote. A $50 deposit holds the slot. The crew finds a
-              mattress and the customer approves $309 → $374 on their phone. The $324 balance is
-              tapped before the truck leaves — and the week's numbers update on their own.
+              A photo becomes a quote. A deposit holds the slot. The crew adds an item and the
+              customer approves the update on their phone. The remaining balance is paid before the
+              truck leaves — and the week's numbers update on their own.
             </p>
             <Link
               to="/demo"
@@ -163,57 +250,15 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* --------------------------------------------- 5. Start where it hurts */}
-      <section className="border-b border-bd-navy/10 bg-bd-paper">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-          <SectionLabel>Start where it hurts</SectionLabel>
-          <h2 className="mt-3 max-w-2xl font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
-            You don't have to replace everything to stop the bleeding.
-          </h2>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {entryPaths.map((path, index) => (
-              <div
-                key={path.title}
-                className={`flex flex-col rounded-xl border p-5 ${
-                  index === 2
-                    ? "border-bd-blue bg-white shadow-lg shadow-bd-navy/5"
-                    : "border-bd-navy/10 bg-white"
-                }`}
-              >
-                <p className="text-[11px] font-bold uppercase tracking-wide text-bd-blue">
-                  {path.detail}
-                </p>
-                <h3 className="mt-2 font-display text-lg font-bold text-bd-navy">{path.title}</h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {path.body}
-                </p>
-                <a
-                  href={mailtoFor(`${path.title} — Booked to Done`, prospect)}
-                  className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-bd-blue hover:underline"
-                >
-                  Talk about this <ArrowRight className="size-3.5" />
-                </a>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-5 text-sm text-muted-foreground">
-            We connect your calendar, your website and your payment processor — whichever ones you
-            already pay for.
-          </p>
-        </div>
-      </section>
-
       {/* ------------------------------------------------- 6. How we work */}
       <section className="border-b border-bd-navy/10 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <SectionLabel>How we work</SectionLabel>
           <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-bd-navy sm:text-3xl">
-            Three steps, no agency theatre.
+            Four steps, built around your work.
           </h2>
 
-          <ol className="mt-8 grid gap-6 md:grid-cols-3">
+          <ol className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {howWeWork.map((item) => (
               <li key={item.step} className="border-t-2 border-bd-blue pt-4">
                 <p className="font-display text-xs font-extrabold text-bd-blue">{item.step}</p>
@@ -222,22 +267,6 @@ function LandingPage() {
               </li>
             ))}
           </ol>
-
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl bg-bd-paper px-5 py-4">
-            {[
-              "About $500 setup, credited",
-              "$249–399 per month",
-              "Refunded if the pilot misses",
-            ].map((line) => (
-              <span
-                key={line}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-bd-navy"
-              >
-                <Check className="size-4 text-bd-green" />
-                {line}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -245,23 +274,28 @@ function LandingPage() {
       <section className="border-b border-bd-navy/10 bg-bd-paper">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <SectionLabel>Who you're talking to</SectionLabel>
-          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
-            {/* TODO: swap for Jerry's photo when it lands in /public */}
-            <span
-              aria-hidden="true"
-              className="grid size-20 shrink-0 place-items-center rounded-full bg-bd-navy font-display text-2xl font-extrabold text-white"
-            >
-              JH
-            </span>
-            <div>
-              <p className="font-display text-xl font-bold text-bd-navy">Jerry Huang</p>
-              <p className="text-sm font-semibold text-bd-blue">Co-founder</p>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                You talk. We listen. We build it around you. Every system we ship starts with a
-                conversation about how your business actually runs — not a template we're trying to
-                sell you.
-              </p>
-            </div>
+          {/* TODO: replace initials avatars with founder photos when approved images are available in /public. */}
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {[
+              { name: "Jerry Huang", initials: "JH" },
+              { name: "Aretha Madeline", initials: "AB" },
+            ].map((founder) => (
+              <div
+                key={founder.name}
+                className="flex items-center gap-4 rounded-xl border border-bd-navy/10 bg-white p-5"
+              >
+                <span
+                  aria-hidden="true"
+                  className="grid size-16 shrink-0 place-items-center rounded-full bg-bd-navy font-display text-xl font-extrabold text-white"
+                >
+                  {founder.initials}
+                </span>
+                <div>
+                  <p className="font-display text-lg font-bold text-bd-navy">{founder.name}</p>
+                  <p className="text-sm font-semibold text-bd-blue">Co-founder</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -271,18 +305,19 @@ function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-16">
           <h2 className="mx-auto max-w-2xl font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
             {prospect
-              ? `${prospect}, let's see what this looks like with your prices in it.`
-              : "Let's see what this looks like with your prices in it."}
+              ? `${prospect}, see both ends of the job connected.`
+              : "See both ends of the job connected."}
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-white/65">
-            Fifteen minutes on the phone. If it's not a fit, we'll say so.
+            See a customer-facing site where a job starts and a staff-facing system where it lands.
+            Both ends stay connected.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
-              href={mailtoFor("15-min call — Booked to Done", prospect)}
+              href={bookingHrefFor("15-min call — Booked to Done", prospect)}
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-bd-blue px-6 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink sm:w-auto"
             >
-              Book a 15-min call <ArrowRight className="size-4" />
+              Book a meeting <ArrowRight className="size-4" />
             </a>
             <Link
               to="/demo"

@@ -60,7 +60,7 @@ export const features: Feature[] = [
       "Every quote costs you a site visit or a long back-and-forth about what's in the pile.",
     does: [
       "The customer photographs the pile; the items come back labeled.",
-      "Returns a range — $289–349 in the demo — not a number you have to defend.",
+      "Returns a range, not a number you have to defend.",
       "Asks 'did we miss anything?' before anything is booked, so the list is theirs too.",
     ],
     proof: { value: "60 sec", label: "from photo to price range" },
@@ -79,10 +79,10 @@ export const features: Feature[] = [
     problem: "A booking with nothing behind it is a slot you're holding for free.",
     does: [
       "Shows the windows your crew can actually cover, not a blank calendar.",
-      "Takes a $50 deposit at booking, credited against the final bill.",
+      "Takes a deposit at booking, credited against the final bill.",
       "Confirms by text and email the moment it's taken.",
     ],
-    proof: { value: "$50", label: "held at booking" },
+    proof: { value: "Held", label: "at booking" },
     next: {
       title: "Appears on the schedule",
       line: "The job drops onto the day with the deposit already recorded against it.",
@@ -117,10 +117,10 @@ export const features: Feature[] = [
     problem: "The pile is bigger than the photo, and now it's an argument in a driveway.",
     does: [
       "The crew adds the extra item; the new total appears on the customer's phone.",
-      "Shows the old price and the new one side by side — $309 to $374 in the demo.",
+      "Shows the original and updated price side by side on the customer's phone.",
       "The job only moves forward once they tap approve.",
     ],
-    proof: { value: "$309 → $374", label: "approved on their phone" },
+    proof: { value: "Approved", label: "on their phone" },
     next: {
       title: "Rewrites the invoice",
       line: "The approved amount becomes the invoice total, with the change and the timestamp on the record.",
@@ -135,11 +135,11 @@ export const features: Feature[] = [
     partner: "owner-dashboard",
     problem: "The work is done, the money is thirty days out, and you're the one chasing it.",
     does: [
-      "Takes the balance on site — $324 in the demo, deposit already deducted.",
+      "Takes the remaining balance on site, with the deposit already deducted.",
       "Emails the receipt itself, with the item list on it.",
       "Asks for the review while the driveway is still empty.",
     ],
-    proof: { value: "$324", label: "collected before leaving" },
+    proof: { value: "On site", label: "collected before leaving" },
     next: {
       title: "Counts on the dashboard",
       line: "The payment lands in the week's numbers without anyone opening a spreadsheet.",
@@ -214,9 +214,9 @@ export const features: Feature[] = [
     does: [
       "The stop list, the address and the photos, on their phone.",
       "One tap marks en route, on site and done.",
-      "Add an item on site — a mattress at +$65 — and the price moves with it.",
+      "Add an item on site and the updated price moves with it.",
     ],
-    proof: { value: "+$65", label: "added on site, priced instantly" },
+    proof: { value: "One tap", label: "adds an item and updates the price" },
     next: {
       title: "Texts the customer",
       line: "Marking 'en route' is what sends the on-my-way message. No one writes it.",
@@ -279,8 +279,8 @@ export const problems: { label: string; slug: string }[] = [
   { label: "Missed calls", slug: "ai-assistant" },
   { label: "Slow quotes", slug: "photo-estimate" },
   { label: "Endless texting", slug: "reminders" },
-  { label: "No-shows", slug: "booking-deposit" },
-  { label: "Typing it twice", slug: "job-card" },
+  { label: "Bookings that fall through", slug: "booking-deposit" },
+  { label: "Re-entering the same details", slug: "job-card" },
   { label: "Chasing payments", slug: "payments" },
 ];
 
@@ -307,23 +307,40 @@ export const howWeWork = [
   {
     step: "01",
     title: "A 15-minute call",
-    body: "You tell us how the work actually runs — your prices, your trucks, your service area. No deck.",
+    body: "You tell us how the work actually runs.",
   },
   {
     step: "02",
-    title: "Built in 7 days",
-    body: "You get your system, with your pricing in it, live and working inside a week.",
+    title: "We hear about your problem",
+    body: "What's costing you jobs, in your words.",
   },
   {
     step: "03",
-    title: "A 30-day pilot",
-    body: "About $500 to set up, then $249–399 a month with the setup credited. If the pilot doesn't book the jobs we agreed, the setup is refunded.",
+    title: "We build tailored to your solution",
+    body: "Your prices, your trucks, your service area.",
+  },
+  {
+    step: "04",
+    title: "Continued support",
+    body: "We keep changing and updating the system so it flows with how your team actually works. No end date.",
   },
 ];
 
-export const contactEmail = "jerryhuangpro@gmail.com";
+export const contactEmail = "bookedtodone@gmail.com";
+
+/** Paste the Calendly / Cal.com URL here and every booking button goes live. */
+export const BOOKING_URL: string | null = null;
 
 export function mailtoFor(subject: string, prospect?: string) {
   const body = prospect ? `Hi Jerry,\n\nI'm with ${prospect}. ` : "Hi Jerry,\n\n";
   return `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export function bookingHrefFor(subject: string, prospect?: string) {
+  if (!BOOKING_URL) return mailtoFor(subject, prospect);
+  if (!prospect) return BOOKING_URL;
+
+  const url = new URL(BOOKING_URL);
+  url.searchParams.set("prospect", prospect);
+  return url.toString();
 }

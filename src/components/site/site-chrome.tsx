@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Truck } from "lucide-react";
 
-import { contactEmail, mailtoFor } from "@/data/site-content";
+import { bookingHrefFor, contactEmail } from "@/data/site-content";
 import { prospectSearch, useProspect } from "@/lib/prospect";
 import { cn } from "@/lib/utils";
 
@@ -56,10 +56,11 @@ export function SiteHeader() {
             <span className="hidden sm:inline">See the demo</span>
           </Link>
           <a
-            href={mailtoFor("15-min call — Booked to Done", prospect)}
+            href={bookingHrefFor("15-min call — Booked to Done", prospect)}
+            aria-label="Book a meeting at a time that suits you"
             className="inline-flex min-h-11 items-center rounded-lg bg-bd-blue px-3 text-[13px] font-bold text-white transition-colors hover:bg-bd-blue-ink sm:px-4 sm:text-sm"
           >
-            Book a call
+            Book a meeting
           </a>
         </nav>
       </div>

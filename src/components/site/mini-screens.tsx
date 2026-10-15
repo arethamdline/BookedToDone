@@ -2,8 +2,7 @@ import { Camera, Check, Sparkles, Truck } from "lucide-react";
 
 /**
  * Small, non-interactive renderings of the sample junk company and the office
- * behind it. Numbers follow the demo script: $289–349 quote, $50 deposit,
- * +$65 mattress, $309 → $374, $324 balance.
+ * behind it. These are illustrative customer and office screens.
  */
 
 export function MiniCustomerQuote() {
@@ -34,9 +33,9 @@ export function MiniCustomerQuote() {
 
         <div className="space-y-1">
           {[
-            ["Sofa", "$85"],
-            ["Mattress", "$65"],
-            ["4 × bags", "$48"],
+            ["Sofa", "Furniture"],
+            ["Mattress", "Special item"],
+            ["4 × bags", "General junk"],
           ].map(([item, price]) => (
             <div key={item} className="flex justify-between border-b border-dashed pb-0.5">
               <span>{item}</span>
@@ -49,10 +48,8 @@ export function MiniCustomerQuote() {
           <p className="text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
             Your estimate
           </p>
-          <p className="font-display text-base font-extrabold tabular-nums text-zinc-900">
-            $289–349
-          </p>
-          <p className="mt-0.5 text-[9px] text-zinc-500">$50 deposit · credited to your bill</p>
+          <p className="font-display text-sm font-extrabold text-zinc-900">Price range ready</p>
+          <p className="mt-0.5 text-[9px] text-zinc-500">Deposit applied at booking</p>
         </div>
 
         <div className="rounded bg-emerald-700 py-1.5 text-center text-[10px] font-bold text-white">
@@ -93,12 +90,12 @@ export function MiniJobCard() {
 
         <div className="flex items-center justify-between rounded-md bg-zinc-100 px-2 py-1.5">
           <span className="font-semibold">Estimate</span>
-          <span className="font-display text-xs font-extrabold tabular-nums">$289–349</span>
+          <span className="font-display text-xs font-extrabold">Range ready</span>
         </div>
 
         <div className="flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1.5 text-emerald-900">
           <Check className="size-3 shrink-0" />
-          <span className="font-semibold">Deposit $50 received</span>
+          <span className="font-semibold">Deposit received</span>
         </div>
 
         <div className="flex items-center gap-1.5 text-zinc-500">
