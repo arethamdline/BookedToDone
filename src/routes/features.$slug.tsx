@@ -125,18 +125,16 @@ function FeaturePage() {
                           search={search}
                           aria-current={here ? "page" : undefined}
                           className={cn(
-                            "group flex min-h-12 items-center justify-between gap-3 py-1 text-[15px] transition-colors",
+                            "group flex min-h-12 items-center justify-between gap-3 border-l-2 py-1 pl-3 text-[15px] transition-colors",
+                            // the green rule and weight say "you're on this one";
+                            // dropping the arrow says it isn't a trip elsewhere
                             here
-                              ? "font-bold text-bd-blue"
-                              : "font-medium text-bd-navy hover:text-bd-blue",
+                              ? "border-bd-blue font-bold text-bd-blue"
+                              : "border-transparent font-medium text-bd-navy hover:border-bd-line hover:text-bd-blue",
                           )}
                         >
                           <span className="truncate">{f.title}</span>
-                          {here ? (
-                            <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-bd-body">
-                              You're here
-                            </span>
-                          ) : (
+                          {!here && (
                             <ArrowRight className="size-4 shrink-0 text-bd-body transition-transform group-hover:translate-x-0.5 group-hover:text-bd-blue" />
                           )}
                         </Link>
