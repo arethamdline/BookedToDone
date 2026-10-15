@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
+import { StaffInsights } from "@/components/staff-insights";
 import { StaffShell } from "@/components/staff-shell";
 import { BookingPhotos } from "@/components/booking-photos";
 import { QuotationEditor, CommunicationTimeline } from "@/components/booking-details";
@@ -228,6 +229,7 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
   const scheduled = data.jobs.filter((j) => j.date === today() && active(j));
   return (
     <div className="space-y-6">
+      <StaffInsights jobs={data.jobs} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Metric
           icon={Truck}
