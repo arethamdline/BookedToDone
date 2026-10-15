@@ -1,14 +1,4 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# Demo and prospect-facing pages are intentionally not indexed.
+# Every route also sends `<meta name="robots" content="noindex">`.
 User-agent: *
-Allow: /
+Disallow: /

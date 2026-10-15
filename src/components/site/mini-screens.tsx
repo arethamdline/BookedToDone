@@ -118,32 +118,3 @@ export function MiniJobCard() {
     </div>
   );
 }
-
-export function MiniAssistant() {
-  return (
-    <div className="flex h-full flex-col bg-white p-2.5 text-[10px] leading-snug text-bd-navy">
-      <div className="mb-2 flex items-center gap-1.5 border-b border-bd-line pb-1.5">
-        <span className="bd-ai-gradient grid size-4 shrink-0 place-items-center rounded-full text-white">
-          <Sparkles className="size-2.5" />
-        </span>
-        <span className="font-display text-[11px] font-bold">Sample Junk Co.</span>
-        <span className="ml-auto text-[9px] text-bd-mute">9:14 pm</span>
-      </div>
-      <div className="flex-1 space-y-2">
-        <div className="ml-auto w-4/5 rounded-lg rounded-br-sm bg-bd-blue px-2 py-1.5 text-white">
-          Can you take a hot tub Saturday?
-        </div>
-        <div className="w-5/6 rounded-lg rounded-bl-sm bg-bd-chip px-2 py-1.5">
-          Yes — Saturday 8 AM to 4 PM. Hot tubs are quoted from a photo since access changes the
-          price. Send one and I'll price it now.
-          <p className="mt-1 text-[8px] font-semibold uppercase tracking-wide text-bd-body">
-            AI answer · from Sample Junk Co.'s price list
-          </p>
-        </div>
-      </div>
-      <div className="mt-2 rounded-full border border-bd-line px-2.5 py-1.5 text-[9px] text-bd-mute">
-        Type a message…
-      </div>
-    </div>
-  );
-}

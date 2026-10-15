@@ -300,10 +300,6 @@ export function getFeature(slug: string) {
   return features.find((f) => f.slug === slug);
 }
 
-export function getPartner(feature: Feature) {
-  return getFeature(feature.partner);
-}
-
 /** The six pains from the demo video, each pointing at the thing that fixes it. */
 export const problems: { label: string; slug: string }[] = [
   { label: "Missed calls", slug: "ai-assistant" },

@@ -566,6 +566,8 @@ export function JunkBookingForm({
                         }
                         <input
                           required
+                          name={k}
+                          id={`booking-${k}`}
                           className={input}
                           type={k === "email" ? "email" : k === "phone" ? "tel" : "text"}
                           value={job[k]}
@@ -573,15 +575,17 @@ export function JunkBookingForm({
                             set(k, k === "state" ? e.target.value.toUpperCase() : e.target.value)
                           }
                           autoComplete={
-                            k === "name"
-                              ? "name"
-                              : k === "email"
-                                ? "email"
-                                : k === "phone"
-                                  ? "tel"
-                                  : k === "street"
-                                    ? "street-address"
-                                    : undefined
+                            (
+                              {
+                                name: "name",
+                                email: "email",
+                                phone: "tel",
+                                street: "street-address",
+                                city: "address-level2",
+                                state: "address-level1",
+                                zip: "postal-code",
+                              } as const
+                            )[k]
                           }
                         />
                       </label>

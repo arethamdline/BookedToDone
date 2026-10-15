@@ -68,6 +68,7 @@ const THREAD_STORAGE = "smart-junk-assistant-threads";
 export const Route = createFileRoute("/assistant/$threadId")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex" },
       { title: "AI assistant — Booked to Done" },
       { name: "description", content: "Junk removal help from the Sample Junk Co. assistant." },
       { property: "og:title", content: "AI assistant — Booked to Done" },
