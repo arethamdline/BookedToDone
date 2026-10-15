@@ -25,7 +25,9 @@ import {
   useJunk,
 } from "@/lib/junk-store";
 export const Route = createFileRoute("/portal")({
-  head: () => ({ meta: [{ title: "My bookings — Sample Junk Co." }] }),
+  head: () => ({
+    meta: [{ title: "My bookings — Sample Junk Co." }, { name: "robots", content: "noindex" }],
+  }),
   component: Portal,
 });
 function Portal() {

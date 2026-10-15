@@ -59,7 +59,9 @@ export const Route = createFileRoute("/staff")({
   validateSearch: (s: Record<string, unknown>): { section?: string } => ({
     section: typeof s["section"] === "string" ? s["section"] : "Overview",
   }),
-  head: () => ({ meta: [{ title: "Operations — Sample Junk Co." }] }),
+  head: () => ({
+    meta: [{ title: "Operations — Sample Junk Co." }, { name: "robots", content: "noindex" }],
+  }),
   component: Staff,
 });
 function Staff() {

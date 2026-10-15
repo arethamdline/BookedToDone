@@ -28,7 +28,9 @@ import { readChatDraft } from "@/lib/junk-store";
 export const Route = createFileRoute("/book")({
   validateSearch: (s: Record<string, unknown>): { source?: string } =>
     s["source"] === "Chat" ? { source: "Chat" } : {},
-  head: () => ({ meta: [{ title: "Book a pickup — Sample Junk Co." }] }),
+  head: () => ({
+    meta: [{ title: "Book a pickup — Sample Junk Co." }, { name: "robots", content: "noindex" }],
+  }),
   component: Book,
 });
 function Book() {
