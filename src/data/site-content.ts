@@ -82,7 +82,7 @@ export const features: Feature[] = [
       "Takes a deposit at booking, credited against the final bill.",
       "Confirms by text and email the moment it's taken.",
     ],
-    proof: { value: "Held", label: "at booking" },
+    proof: { value: "$50", label: "deposit holds the slot" },
     next: {
       title: "Appears on the schedule",
       line: "The job drops onto the day with the deposit already recorded against it.",
@@ -120,7 +120,7 @@ export const features: Feature[] = [
       "Shows the original and updated price side by side on the customer's phone.",
       "The job only moves forward once they tap approve.",
     ],
-    proof: { value: "Approved", label: "on their phone" },
+    proof: { value: "$309 → $374", label: "approved on their phone" },
     next: {
       title: "Rewrites the invoice",
       line: "The approved amount becomes the invoice total, with the change and the timestamp on the record.",
@@ -139,7 +139,7 @@ export const features: Feature[] = [
       "Emails the receipt itself, with the item list on it.",
       "Asks for the review while the driveway is still empty.",
     ],
-    proof: { value: "On site", label: "collected before leaving" },
+    proof: { value: "$324", label: "collected before the truck leaves" },
     next: {
       title: "Counts on the dashboard",
       line: "The payment lands in the week's numbers without anyone opening a spreadsheet.",
@@ -216,7 +216,7 @@ export const features: Feature[] = [
       "One tap marks en route, on site and done.",
       "Add an item on site and the updated price moves with it.",
     ],
-    proof: { value: "One tap", label: "adds an item and updates the price" },
+    proof: { value: "+$65", label: "added on site, priced instantly" },
     next: {
       title: "Texts the customer",
       line: "Marking 'en route' is what sends the on-my-way message. No one writes it.",
