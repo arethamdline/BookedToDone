@@ -2,13 +2,13 @@ import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * The 64-second walkthrough.
+ * The walkthrough video.
  *
- * TO SWAP IN THE REAL VIDEO: drop the file at `public/video/demo-v3.mp4` and a
- * still at `public/video/demo-v3-poster.jpg`, then set VIDEO_SRC below. Nothing
- * else needs to change — the placeholder disappears on its own.
+ * To replace it, drop a new file at `public/video/demo-v3.mp4`. POSTER_SRC is
+ * the still shown before playback — swap it for a frame from the video itself
+ * when one is exported.
  */
-const VIDEO_SRC: string | null = null;
+const VIDEO_SRC: string | null = "/video/demo-v3.mp4";
 const POSTER_SRC = "/junk-removal-hero-v2.png";
 
 export function DemoVideo({ className }: { className?: string }) {

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Bot, MessageCircle, Send, X } from "lucide-react";
 import { answerCompanyQuestion, company } from "@/data/company";
 import { readData } from "@/lib/junk-store";
+import { cn } from "@/lib/utils";
 import { recordCustomerAssistantMessage, useSupport } from "@/lib/support-store";
 
 type ChatMessage = { id: string; role: "customer" | "assistant"; text: string };
@@ -339,6 +340,10 @@ function AssistantLauncher({
   const [tucked, setTucked] = useState(false);
   const [peeking, setPeeking] = useState(false);
   const [index, setIndex] = useState(0);
+  // Collapses on its own 10s after the page opens, so it introduces itself and
+  // then gets out of the way. Not persisted — every page view gets the intro.
+  const [autoTucked, setAutoTucked] = useState(false);
+  const [engaged, setEngaged] = useState(false);
 
   useEffect(() => {
     try {
@@ -347,6 +352,15 @@ function AssistantLauncher({
       /* blocked storage — just show it */
     }
   }, []);
+
+  const collapsed = (tucked || autoTucked) && !peeking;
+
+  const reveal = () => {
+    setEngaged(true);
+    setAutoTucked(false);
+    setPeeking(false);
+    setTuckedPersisted(false);
+  };
 
   const setTuckedPersisted = (value: boolean) => {
     setTucked(value);
@@ -357,12 +371,18 @@ function AssistantLauncher({
     }
   };
 
+  useEffect(() => {
+    if (tucked || engaged || open) return;
+    const id = window.setTimeout(() => setAutoTucked(true), 10000);
+    return () => clearTimeout(id);
+  }, [tucked, engaged, open]);
+
   // Rotate the suggestion so the robot always looks like it has something to say.
   useEffect(() => {
-    if (open || tucked) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % starters.length), 1500);
+    if (open || collapsed) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % starters.length), 2000);
     return () => clearInterval(id);
-  }, [open, tucked]);
+  }, [open, collapsed]);
 
   if (open) {
     return (
@@ -377,7 +397,7 @@ function AssistantLauncher({
     );
   }
 
-  if (tucked && !peeking) {
+  if (collapsed) {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[70] flex justify-center px-3 lg:bottom-6">
         <button
@@ -386,7 +406,7 @@ function AssistantLauncher({
           // touch, where there is no hover.
           onMouseEnter={() => setPeeking(true)}
           onFocus={() => setPeeking(true)}
-          onClick={() => setTuckedPersisted(false)}
+          onClick={reveal}
           aria-label="Show the AI assistant"
           className="bd-ai-gradient pointer-events-auto grid size-12 place-items-center rounded-full text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -405,11 +425,14 @@ function AssistantLauncher({
           // a hover-peek closes again on its own; a deliberately opened one stays
           if (tucked) setPeeking(false);
         }}
-        className="bd-pill-in pointer-events-auto flex w-[21rem] max-w-full items-center gap-1.5 rounded-full border bg-background p-1.5 shadow-xl"
+        className="bd-pill-in pointer-events-auto flex max-w-full items-center gap-1.5 rounded-full border bg-background p-1.5 shadow-xl"
       >
         <button
           type="button"
-          onClick={openChat}
+          onClick={() => {
+            setEngaged(true);
+            openChat();
+          }}
           aria-label="Open AI chat"
           className="bd-ai-gradient flex h-11 shrink-0 items-center gap-1.5 rounded-full pl-2.5 pr-3 text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -420,19 +443,36 @@ function AssistantLauncher({
         {/* fixed-width, single-line: the pill must not resize as prompts rotate */}
         <button
           type="button"
-          onClick={() => ask(starters[index]!)}
-          className="min-w-0 flex-1 truncate rounded-full px-1 py-1.5 text-left text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={() => {
+            setEngaged(true);
+            ask(starters[index]!);
+          }}
+          className="min-w-0 rounded-full px-1 py-1.5 text-left text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {/* keyed so each prompt fades in rather than snapping */}
-          <span key={index} className="bd-prompt-in block truncate">
-            {starters[index]}
+          {/* all prompts share one grid cell: the widest sets the width, so
+              the pill never resizes and never leaves slack */}
+          <span className="grid">
+            {starters.map((q, i) => (
+              <span
+                key={q}
+                aria-hidden={i !== index}
+                className={cn(
+                  "col-start-1 row-start-1 truncate",
+                  i === index ? "bd-prompt-in" : "invisible",
+                )}
+              >
+                {q}
+              </span>
+            ))}
           </span>
         </button>
 
         <button
           type="button"
           onClick={() => {
+            setEngaged(true);
             setPeeking(false);
+            setAutoTucked(false);
             setTuckedPersisted(true);
           }}
           aria-label="Tuck the assistant away"
