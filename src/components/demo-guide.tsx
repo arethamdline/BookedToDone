@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { nearestStepForRoute, tour, tourLength } from "@/data/demo-tour";
-import { bookingHrefFor } from "@/data/site-content";
+import { bookingHrefFor, contactEmail } from "@/data/site-content";
 import { useProspect } from "@/lib/prospect";
 import { cn } from "@/lib/utils";
 
@@ -363,6 +363,17 @@ export function DemoGuide() {
               Exit the demo
             </Link>
           </div>
+
+          {/* For anyone who'd rather ask a question than book a slot. */}
+          <p className="mt-4 border-t border-bd-line pt-3 text-xs text-bd-body">
+            Rather just ask?{" "}
+            <a
+              href={`mailto:${contactEmail}`}
+              className="font-semibold text-bd-blue underline underline-offset-2 hover:text-bd-blue-ink"
+            >
+              {contactEmail}
+            </a>
+          </p>
         </div>
       </div>
     );

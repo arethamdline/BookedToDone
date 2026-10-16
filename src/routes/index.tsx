@@ -5,7 +5,14 @@ import { SiteHeader, SiteFooter } from "@/components/site/site-chrome";
 import { FlowHero } from "@/components/site/flow-hero";
 import { TwoSidesMap } from "@/components/site/two-sides-map";
 import { DemoVideo } from "@/components/site/demo-video";
-import { bookingHrefFor, entryPaths, getFeature, howWeWork, problems } from "@/data/site-content";
+import {
+  bookingHrefFor,
+  contactEmail,
+  entryPaths,
+  getFeature,
+  howWeWork,
+  problems,
+} from "@/data/site-content";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
 
 export const Route = createFileRoute("/")({
@@ -77,6 +84,19 @@ function LandingPage() {
             <p className="mx-auto mt-4 max-w-xl text-sm text-bd-body">
               Pick a time that suits you. We'll learn exactly what your problem is, then suggest
               what would fix it.
+            </p>
+            {/* Not everyone wants to put something in a calendar to ask a
+                question. The address is plain text as well as a link, so it can
+                be copied or just read off the page. */}
+            <p className="mx-auto mt-2 max-w-xl text-sm text-bd-body">
+              Or email us at{" "}
+              <a
+                href={`mailto:${contactEmail}`}
+                className="font-semibold text-bd-blue underline underline-offset-2 hover:text-bd-blue-ink"
+              >
+                {contactEmail}
+              </a>
+              .
             </p>
           </div>
         </div>
@@ -379,6 +399,16 @@ function LandingPage() {
                 Play with the demo first
               </Link>
             </div>
+            <p className="mt-5 text-sm text-white/70">
+              Or email us at{" "}
+              <a
+                href={`mailto:${contactEmail}`}
+                className="font-semibold text-white underline underline-offset-2 hover:text-white/80"
+              >
+                {contactEmail}
+              </a>{" "}
+              — no meeting needed.
+            </p>
           </div>
         </div>
       </section>

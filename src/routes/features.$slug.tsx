@@ -5,6 +5,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/site-chrome";
 import { FeatureDemo } from "@/components/site/feature-demo";
 import {
   bookingHrefFor,
+  contactEmail,
   customerFeatures,
   getFeature,
   staffFeatures,
@@ -99,6 +100,15 @@ function FeaturePage() {
                   Learn how we'd add this to your operation
                 </span>
               </a>
+              <p className="mt-3 text-sm text-bd-body">
+                Or just ask us:{" "}
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="font-semibold text-bd-blue underline underline-offset-2 hover:text-bd-blue-ink"
+                >
+                  {contactEmail}
+                </a>
+              </p>
             </div>
           </div>
 
