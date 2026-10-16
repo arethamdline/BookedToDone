@@ -301,8 +301,12 @@ function LandingPage() {
           {/* TODO: replace initials avatars with founder photos when approved images are available in /public. */}
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
-              { name: "Jerry Huang", initials: "JH" },
-              { name: "Aretha Madeline Budiman", initials: "AB" },
+              { name: "Jerry Huang", initials: "JH", title: "Founder" },
+              {
+                name: "Aretha Madeline Budiman",
+                initials: "AB",
+                title: "Chief Technology Officer",
+              },
             ].map((founder) => (
               <div
                 key={founder.name}
@@ -316,7 +320,7 @@ function LandingPage() {
                 </span>
                 <div>
                   <p className="font-display text-lg font-bold text-bd-navy">{founder.name}</p>
-                  <p className="text-sm font-semibold text-bd-blue">Co-founder</p>
+                  <p className="text-sm font-semibold text-bd-blue">{founder.title}</p>
                 </div>
               </div>
             ))}

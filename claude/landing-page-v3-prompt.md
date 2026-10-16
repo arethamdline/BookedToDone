@@ -74,9 +74,9 @@ No prices anywhere on the site. Pricing is a conversation, not a page.
 
 WHO YOU'RE TALKING TO
 
-Two co-founders, both titled Co-founder:
-- Jerry Huang
-- Aretha Madeline Budiman
+The two people behind it:
+- Jerry Huang — Founder
+- Aretha Madeline Budiman — Chief Technology Officer
 
 Neither photo is in /public yet, so use the existing initials-avatar treatment (JH, AB) and leave a
 TODO for the swap. Do NOT invent bios, credentials or history for either of them.
@@ -163,6 +163,6 @@ npm run check, npm run lint (0 errors), npm run test:demo (PASS) and npm run bui
 - "You only pay for what you need" reads as a headline, not a footnote.
 - "The full system" is visibly the recommended option.
 - grep -ri "jerryhuangpro" returns nothing.
-- Both founders listed as Co-founder, with nothing invented.
+- Both listed with their own title, with nothing invented.
 - Every booking button reads from the single BOOKING_URL constant.
 - / and /features/photo-estimate?prospect=Test both render at 375px with no horizontal scroll.

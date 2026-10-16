@@ -124,10 +124,10 @@ for what you need`.
 
 ## 7. Who you're talking to
 
-Two co-founders. Both titled **Co-founder**.
+The two people behind it:
 
-- **Jerry Huang** — Co-founder
-- **Aretha Madeline Budiman** — Co-founder
+- **Jerry Huang** — Founder
+- **Aretha Madeline Budiman** — Chief Technology Officer
 
 Neither photo exists in `/public` yet. Use the existing initials-avatar treatment for both (`JH`,
 `AB`) and leave a `TODO` comment for the swap. **Do not invent bios, credentials or history for
@@ -252,7 +252,7 @@ Plus, by eye:
 - [ ] "You only pay for what you need" reads as a headline, not a footnote.
 - [ ] "The full system" is visibly the recommended option.
 - [ ] `grep -ri "jerryhuangpro"` returns nothing.
-- [ ] Both founders listed as Co-founder, no invented detail.
+- [ ] Both listed with their own title, no invented detail.
 - [ ] Every booking button reads from the single `BOOKING_URL` constant.
 - [ ] `/` and `/features/photo-estimate?prospect=Test` both render at 375px with no horizontal
       scroll.
