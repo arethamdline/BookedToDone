@@ -7,10 +7,11 @@ import {
   Compass,
   MousePointerClick,
   PanelTopClose,
+  RotateCcw,
   X,
 } from "lucide-react";
 
-import { stepIndexForRoute, tour, tourLength } from "@/data/demo-tour";
+import { nearestStepForRoute, tour, tourLength } from "@/data/demo-tour";
 import { bookingHrefFor } from "@/data/site-content";
 import { useProspect } from "@/lib/prospect";
 import { cn } from "@/lib/utils";
@@ -88,11 +89,14 @@ export function DemoGuide() {
   const cardRef = useRef<HTMLElement>(null);
   /** True while a navigation the tour itself asked for is still in flight. */
   const navigating = useRef(false);
+  /** Saved position restored. Until then there is nothing to follow. */
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setCollapsed(read(COLLAPSED_KEY) === "1");
     const saved = Number(read(STEP_KEY));
     if (Number.isInteger(saved) && saved > 0 && saved < tourLength) setStep(saved);
+    setReady(true);
   }, []);
 
   const goTo = useCallback(
@@ -115,20 +119,25 @@ export function DemoGuide() {
 
   /**
    * The visitor can move themselves — the demo bar switches sides at any step.
-   * When they land somewhere this step isn't about, pick up the tour at the
-   * start of that side rather than leaving the card describing another screen.
+   * When they land somewhere this step isn't about, move to the nearest step
+   * for where they now are, rather than leaving the card describing another
+   * screen or dumping them back at step one.
    */
   useEffect(() => {
+    // Not before the saved position is back, or the first render — still on
+    // step one — would snap a reloaded tour to the top of whatever route it
+    // reloaded on, undoing the restore that is about to land.
+    if (!ready) return;
     if (current.route === pathname) {
       navigating.current = false;
       return;
     }
     if (navigating.current) return;
-    const i = stepIndexForRoute(pathname);
+    const i = nearestStepForRoute(pathname, step);
     if (i === -1 || i === step) return;
     setStep(i);
     write(STEP_KEY, String(i));
-  }, [pathname, current.route, step]);
+  }, [ready, pathname, current.route, step]);
 
   const measure = useCallback(() => {
     if (!live) {
@@ -276,7 +285,18 @@ export function DemoGuide() {
         className="pointer-events-auto fixed bottom-20 left-4 z-[75] inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5"
       >
         <Compass className="size-4" />
-        Show me around
+        {/* Nine steps in, "Show me around" reads like starting over. Say what
+            pressing it actually does. */}
+        {step > 0 ? (
+          <>
+            Back to the tour
+            <span className="font-bold tabular-nums text-white/60">
+              {step + 1}/{tourLength}
+            </span>
+          </>
+        ) : (
+          "Show me around"
+        )}
       </button>
     );
 
@@ -342,27 +362,32 @@ export function DemoGuide() {
           highlightLow ? "top-20" : "bottom-20 lg:bottom-5",
         )}
       >
-        {/* A tour needs to announce itself as one, and show how far along it is. */}
-        <div className="bd-ai-gradient flex items-center gap-2 px-4 py-2 text-white">
-          <Compass className="size-3.5 shrink-0" />
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em]">Guided demo</p>
-          <p className="ml-auto text-[10px] font-bold tabular-nums opacity-90">
-            {step + 1} / {tourLength}
-          </p>
-          <button
-            type="button"
-            onClick={() => setCollapsedPersisted(true)}
-            aria-label="Hide the guide"
-            className="-mr-1.5 grid size-6 shrink-0 place-items-center rounded transition-colors hover:bg-white/20"
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
-        <div className="h-0.5 bg-bd-chip">
-          <div
-            className="h-full bg-bd-blue transition-[width] duration-500"
-            style={{ width: `${((step + 1) / tourLength) * 100}%` }}
-          />
+        {/* A tour needs to announce itself as one, and show how far along it is.
+            Navy, not the AI gradient: the gradient is reserved for moments where
+            the AI is actually doing something, and the progress line lives
+            inside this bar so it reads as one piece rather than a stray rule. */}
+        <div className="relative bg-bd-navy px-4 pb-2.5 pt-2 text-white">
+          <div className="flex items-center gap-2">
+            <Compass className="size-3.5 shrink-0 text-white/80" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em]">Guided demo</p>
+            <p className="ml-auto text-[10px] font-bold tabular-nums text-white/60">
+              {step + 1} / {tourLength}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCollapsedPersisted(true)}
+              aria-label="Hide the guide"
+              className="-mr-1.5 grid size-6 shrink-0 place-items-center rounded text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white/15">
+            <div
+              className="h-full bg-white/80 transition-[width] duration-500"
+              style={{ width: `${((step + 1) / tourLength) * 100}%` }}
+            />
+          </div>
         </div>
 
         <div className="p-4">
@@ -419,8 +444,10 @@ export function DemoGuide() {
                   on — a step you read rather than press, or one where pressing
                   the lit thing is optional. */}
               {rect && (
-                <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-bd-blue-soft px-3 py-2 text-xs font-bold text-bd-blue-ink">
-                  <MousePointerClick className="mt-px size-3.5 shrink-0" />
+                /* Dashed, so it reads as an instruction rather than a filled
+                   chip that looks like a disabled button. */
+                <p className="mt-3 flex items-start gap-2 rounded-lg border border-dashed border-bd-blue/40 bg-bd-blue-soft/60 px-3 py-2.5 text-xs font-bold leading-snug text-bd-blue-ink">
+                  <MousePointerClick className="mt-px size-4 shrink-0 text-bd-blue" />
                   {current.prompt ?? "Click the highlighted part to carry on"}
                 </p>
               )}
@@ -434,7 +461,7 @@ export function DemoGuide() {
                   className={cn(
                     "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors",
                     rect
-                      ? "mt-2 bg-bd-chip text-bd-navy hover:bg-bd-paper"
+                      ? "mt-2 border border-bd-line bg-white text-bd-body hover:border-bd-navy/25 hover:text-bd-navy"
                       : "mt-3 bg-bd-blue text-white hover:bg-bd-blue-ink",
                   )}
                 >
@@ -453,6 +480,15 @@ export function DemoGuide() {
                   className="flex min-h-8 items-center gap-1 text-[11px] font-semibold text-bd-mute transition-colors hover:text-bd-navy"
                 >
                   <ArrowLeft className="size-3" /> Back
+                </button>
+              )}
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => goTo(0)}
+                  className="flex min-h-8 items-center gap-1 text-[11px] font-semibold text-bd-mute transition-colors hover:text-bd-navy"
+                >
+                  <RotateCcw className="size-3" /> Start over
                 </button>
               )}
               {(rect || blocked) && !current.action && (

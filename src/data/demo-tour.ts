@@ -148,8 +148,19 @@ export const tour: TourStep[] = [
 
 export const tourLength = tour.length;
 
-export function stepIndexForRoute(pathname: string, from = 0): number {
-  const exact = tour.findIndex((s, i) => i >= from && s.route === pathname);
-  if (exact !== -1) return exact;
-  return tour.findIndex((s) => s.route === pathname);
+/**
+ * Where to pick the tour up when the visitor moves themselves — switching sides
+ * from the demo bar, say. Returns the step for `pathname` closest to where they
+ * already are: the last one they'd have seen going back, the first one they
+ * haven't going forward. Jumping someone on step 9 back to step 1 for a quick
+ * look at the other side would throw away everything they'd done.
+ */
+export function nearestStepForRoute(pathname: string, from: number): number {
+  const matches = tour.reduce<number[]>(
+    (acc, s, i) => (s.route === pathname ? [...acc, i] : acc),
+    [],
+  );
+  if (matches.length === 0) return -1;
+  const behind = matches.filter((i) => i <= from);
+  return behind.length > 0 ? behind[behind.length - 1]! : matches[0]!;
 }
