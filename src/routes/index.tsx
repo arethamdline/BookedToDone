@@ -298,26 +298,45 @@ function LandingPage() {
       <section className="border-b border-bd-navy/10 bg-bd-paper">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <SectionLabel>Who you're talking to</SectionLabel>
-          {/* TODO: replace initials avatars with founder photos when approved images are available in /public. */}
+          {/* TODO: swap Aretha's initials for a photo once an approved image is in /public. */}
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
-              { name: "Jerry Huang", initials: "JH", title: "Founder" },
+              {
+                name: "Jerry Huang",
+                initials: "JH",
+                title: "Founder",
+                photo: "/brand/jerry-huang.webp",
+              },
               {
                 name: "Aretha Madeline Budiman",
                 initials: "AB",
                 title: "Chief Technology Officer",
+                photo: null,
               },
             ].map((founder) => (
               <div
                 key={founder.name}
                 className="flex items-center gap-4 rounded-xl border border-bd-navy/10 bg-white p-5"
               >
-                <span
-                  aria-hidden="true"
-                  className="grid size-16 shrink-0 place-items-center rounded-full bg-bd-navy font-display text-xl font-extrabold text-white"
-                >
-                  {founder.initials}
-                </span>
+                {founder.photo ? (
+                  <img
+                    src={founder.photo}
+                    alt=""
+                    aria-hidden="true"
+                    width="320"
+                    height="320"
+                    loading="lazy"
+                    decoding="async"
+                    className="size-16 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="grid size-16 shrink-0 place-items-center rounded-full bg-bd-navy font-display text-xl font-extrabold text-white"
+                  >
+                    {founder.initials}
+                  </span>
+                )}
                 <div>
                   <p className="font-display text-lg font-bold text-bd-navy">{founder.name}</p>
                   <p className="text-sm font-semibold text-bd-blue">{founder.title}</p>
