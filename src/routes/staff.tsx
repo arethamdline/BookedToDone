@@ -473,7 +473,7 @@ function JobDetail({
     });
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 md:grid-cols-2">
+      <div data-tour="booking-detail" className="grid gap-5 md:grid-cols-2">
         <Panel title="Pickup details">
           <div className="space-y-2 text-sm">
             <p>

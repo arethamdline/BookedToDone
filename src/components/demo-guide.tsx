@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check, Compass, MousePointerClick, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Compass,
+  MousePointerClick,
+  PanelTopClose,
+  X,
+} from "lucide-react";
 
-import { tour, tourLength } from "@/data/demo-tour";
+import { stepIndexForRoute, tour, tourLength } from "@/data/demo-tour";
 import { bookingHrefFor } from "@/data/site-content";
 import { useProspect } from "@/lib/prospect";
 import { cn } from "@/lib/utils";
@@ -19,6 +27,26 @@ const STEP_KEY = "bd-demo-tour-step";
 const GUIDE_VAR = "--bd-guide-h";
 
 type Rect = { top: number; left: number; width: number; height: number };
+
+/** An open modal, if there is one. Radix marks the live one `data-state="open"`. */
+const openDialog = () => document.querySelector<HTMLElement>('[role="dialog"][data-state="open"]');
+
+/** Shut whatever modal is open, the same way its own close button would. */
+const closeDialog = () => {
+  const dialog = openDialog();
+  if (!dialog) return;
+  // Press the dialog's own close control where there is one — it runs the same
+  // state updates the visitor's click would, which a synthetic Escape may not.
+  const close = [...dialog.querySelectorAll<HTMLElement>("button")].find(
+    (b) =>
+      b.textContent?.trim().toLowerCase() === "close" || b.ariaLabel?.toLowerCase() === "close",
+  );
+  if (close) {
+    close.click();
+    return;
+  }
+  dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+};
 
 const read = (key: string) => {
   try {
@@ -53,7 +81,13 @@ export function DemoGuide() {
   const [collapsed, setCollapsed] = useState(false);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
+  /** The step's target is inside the open modal, so the page is already dimmed. */
+  const [inDialog, setInDialog] = useState(false);
+  /** A modal is open and this step's target is behind it — nothing to point at. */
+  const [blocked, setBlocked] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
+  /** True while a navigation the tour itself asked for is still in flight. */
+  const navigating = useRef(false);
 
   useEffect(() => {
     setCollapsed(read(COLLAPSED_KEY) === "1");
@@ -67,7 +101,10 @@ export function DemoGuide() {
       setStep(clamped);
       write(STEP_KEY, String(clamped));
       const route = tour[clamped]!.route;
-      if (route !== pathname) router.navigate({ to: route });
+      if (route !== pathname) {
+        navigating.current = true;
+        router.navigate({ to: route });
+      }
     },
     [pathname, router],
   );
@@ -76,19 +113,45 @@ export function DemoGuide() {
   const onThisRoute = current.route === pathname;
   const live = !collapsed && !!current.target && onThisRoute;
 
+  /**
+   * The visitor can move themselves — the demo bar switches sides at any step.
+   * When they land somewhere this step isn't about, pick up the tour at the
+   * start of that side rather than leaving the card describing another screen.
+   */
+  useEffect(() => {
+    if (current.route === pathname) {
+      navigating.current = false;
+      return;
+    }
+    if (navigating.current) return;
+    const i = stepIndexForRoute(pathname);
+    if (i === -1 || i === step) return;
+    setStep(i);
+    write(STEP_KEY, String(i));
+  }, [pathname, current.route, step]);
+
   const measure = useCallback(() => {
     if (!live) {
       setRect(null);
+      setBlocked(false);
+      setInDialog(false);
       return;
     }
     const el = document.querySelector(current.target!);
-    if (!el) {
-      setRect(null);
-      return;
-    }
-    const r = el.getBoundingClientRect();
+    const dialog = openDialog();
+
+    // A modal covers the page. If this step is about something underneath it,
+    // there is nothing useful to ring — saying so beats drawing a highlight
+    // over a card the visitor can't reach.
+    const behindDialog = !!dialog && (!el || !dialog.contains(el));
+    setBlocked(behindDialog);
+    setInDialog(!!dialog && !!el && dialog.contains(el));
+
+    const r = el && !behindDialog ? el.getBoundingClientRect() : null;
     setRect(
-      r.width && r.height ? { top: r.top, left: r.left, width: r.width, height: r.height } : null,
+      r && r.width && r.height
+        ? { top: r.top, left: r.left, width: r.width, height: r.height }
+        : null,
     );
   }, [live, current.target]);
 
@@ -98,8 +161,18 @@ export function DemoGuide() {
     // than once and give up.
     measure();
     const ids = [150, 500, 1200, 2500, 4000].map((d) => window.setTimeout(measure, d));
+    // ...and anything can open a modal over the top at any moment, so watch the
+    // document rather than waiting for the next poll to notice.
+    const observer = new MutationObserver(() => measure());
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-state"],
+    });
     return () => {
       ids.forEach(clearTimeout);
+      observer.disconnect();
     };
   }, [measure, step, pathname]);
 
@@ -114,14 +187,14 @@ export function DemoGuide() {
   }, [measure, live]);
 
   useEffect(() => {
-    if (!live) return;
+    if (!live || blocked) return;
     const id = window.setTimeout(() => {
       document
         .querySelector(current.target!)
         ?.scrollIntoView({ block: "center", behavior: "smooth" });
     }, 200);
     return () => clearTimeout(id);
-  }, [live, current.target, step]);
+  }, [live, blocked, current.target, step]);
 
   /**
    * Pressing the highlighted thing is what moves the tour on. Capture phase so
@@ -129,7 +202,7 @@ export function DemoGuide() {
    * the element's own handler (navigate, open, scan) runs first.
    */
   useEffect(() => {
-    if (!live || current.finish) return;
+    if (!live || blocked || current.finish || current.closesDialog) return;
     const onClick = (e: MouseEvent) => {
       const el = document.querySelector(current.target!);
       if (el && e.target instanceof Node && el.contains(e.target)) {
@@ -138,7 +211,39 @@ export function DemoGuide() {
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [live, current.target, current.finish, current.advanceAfter, step, goTo]);
+  }, [
+    live,
+    blocked,
+    current.target,
+    current.finish,
+    current.closesDialog,
+    current.advanceAfter,
+    step,
+    goTo,
+  ]);
+
+  /**
+   * While a step is pointing at something, clicks anywhere else are swallowed.
+   * Wandering off mid-step is what used to strand the tour — open a booking on
+   * the dashboard and the guide carried on ringing a panel now buried behind
+   * the modal. The demo chrome and the guide's own card stay live, so there is
+   * always a way out: Skip, Back, hide the guide, or leave the demo.
+   */
+  useEffect(() => {
+    if (!live || !rect || inDialog) return;
+    const onClick = (e: MouseEvent) => {
+      const el = e.target;
+      if (!(el instanceof Element)) return;
+      const target = document.querySelector(current.target!);
+      if (target?.contains(el)) return;
+      if (el.closest("[data-tour-allow], aside[aria-label='Demo guide']")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [live, rect, inDialog, current.target]);
 
   // publish our height so the assistant launcher can clear it
   useEffect(() => {
@@ -168,7 +273,7 @@ export function DemoGuide() {
       <button
         type="button"
         onClick={() => setCollapsedPersisted(false)}
-        className="fixed bottom-20 left-4 z-[75] inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5"
+        className="pointer-events-auto fixed bottom-20 left-4 z-[75] inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5"
       >
         <Compass className="size-4" />
         Show me around
@@ -185,31 +290,36 @@ export function DemoGuide() {
       {rect && (
         <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
           {/* A spread shadow big enough to cover the viewport dims everything
-              except the hole punched by this element — the target stays lit and,
-              since the overlay takes no pointer events, still clickable. The
-              ring is a separate element because `bd-pulse` animates box-shadow
-              and would otherwise wipe out the dimming. */}
+              except the hole punched by this element. Skipped inside a modal,
+              which already dims the page behind itself. The ring is a separate
+              element because `bd-pulse` animates box-shadow and would otherwise
+              wipe out the dimming. */}
+          {!inDialog && (
+            <span
+              aria-hidden="true"
+              className="absolute rounded-xl"
+              style={{
+                top: rect.top - 6,
+                left: rect.left - 6,
+                width: rect.width + 12,
+                height: rect.height + 12,
+                boxShadow: "0 0 0 9999px rgba(16, 44, 35, 0.6)",
+              }}
+            />
+          )}
           <span
-            className="absolute rounded-xl"
+            aria-hidden="true"
+            className="bd-pulse pointer-events-none absolute rounded-xl outline outline-2 outline-bd-blue"
             style={{
               top: rect.top - 6,
               left: rect.left - 6,
               width: rect.width + 12,
               height: rect.height + 12,
-              boxShadow: "0 0 0 9999px rgba(16, 44, 35, 0.6)",
             }}
           />
           <span
-            className="bd-pulse absolute rounded-xl outline outline-2 outline-bd-blue"
-            style={{
-              top: rect.top - 6,
-              left: rect.left - 6,
-              width: rect.width + 12,
-              height: rect.height + 12,
-            }}
-          />
-          <span
-            className="bd-nudge absolute flex items-center gap-1.5 rounded-full bg-bd-blue px-3 py-1.5 text-[11px] font-bold text-white shadow-xl"
+            aria-hidden="true"
+            className="bd-nudge pointer-events-none absolute flex items-center gap-1.5 rounded-full bg-bd-blue px-3 py-1.5 text-[11px] font-bold text-white shadow-xl"
             style={{
               top: pointerAbove ? rect.top - 44 : rect.top + rect.height + 12,
               left: Math.max(12, Math.min(rect.left, window.innerWidth - 150)),
@@ -224,7 +334,10 @@ export function DemoGuide() {
         ref={cardRef}
         aria-label="Demo guide"
         className={cn(
-          "fixed left-4 right-4 z-[80] max-w-sm overflow-hidden rounded-xl border border-bd-navy/10 bg-white shadow-2xl shadow-bd-navy/30 sm:right-auto",
+          // `pointer-events-auto` is load-bearing: an open Radix dialog kills
+          // pointer events on everything outside itself, which left the tour
+          // card visible but dead exactly when a visitor most needed it.
+          "pointer-events-auto fixed left-4 right-4 z-[80] max-w-sm overflow-hidden rounded-xl border border-bd-navy/10 bg-white shadow-2xl shadow-bd-navy/30 sm:right-auto",
           pathname.startsWith("/staff") && "lg:left-[16.5rem]",
           highlightLow ? "top-20" : "bottom-20 lg:bottom-5",
         )}
@@ -282,21 +395,53 @@ export function DemoGuide() {
                 I'll keep exploring on my own
               </button>
             </div>
-          ) : rect ? (
-            /* There's something lit up on screen — pressing it is the next
-               step, so the card shouldn't offer a competing primary button. */
-            <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-bd-blue-soft px-3 py-2 text-xs font-bold text-bd-blue-ink">
-              <MousePointerClick className="size-3.5 shrink-0" />
-              {current.prompt ?? "Click the highlighted part to carry on"}
-            </p>
+          ) : blocked ? (
+            /* Something opened over the top of this step. Say so plainly and
+               offer the way back, rather than ringing a panel behind a modal. */
+            <>
+              <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-warning-soft/60 px-3 py-2 text-xs font-semibold text-bd-navy">
+                <PanelTopClose className="mt-px size-3.5 shrink-0" />
+                You've opened something over the tour. Close it and we'll pick up where you left
+                off.
+              </p>
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="mt-2 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bd-blue px-3.5 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
+              >
+                Close it <ArrowRight className="size-3.5" />
+              </button>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={() => goTo(step + 1)}
-              className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bd-blue px-3.5 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
-            >
-              {current.action ?? "Next"} <ArrowRight className="size-3.5" />
-            </button>
+            <>
+              {/* With something lit on screen, the pill says what to try. The
+                  button below is only there on steps that need an explicit way
+                  on — a step you read rather than press, or one where pressing
+                  the lit thing is optional. */}
+              {rect && (
+                <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-bd-blue-soft px-3 py-2 text-xs font-bold text-bd-blue-ink">
+                  <MousePointerClick className="mt-px size-3.5 shrink-0" />
+                  {current.prompt ?? "Click the highlighted part to carry on"}
+                </p>
+              )}
+              {(!rect || current.action) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (current.closesDialog) closeDialog();
+                    goTo(step + 1);
+                  }}
+                  className={cn(
+                    "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors",
+                    rect
+                      ? "mt-2 bg-bd-chip text-bd-navy hover:bg-bd-paper"
+                      : "mt-3 bg-bd-blue text-white hover:bg-bd-blue-ink",
+                  )}
+                >
+                  {current.action ?? "Next"} <ArrowRight className="size-3.5" />
+                </button>
+              )}
+            </>
           )}
 
           {!current.finish && (
@@ -310,10 +455,13 @@ export function DemoGuide() {
                   <ArrowLeft className="size-3" /> Back
                 </button>
               )}
-              {rect && (
+              {(rect || blocked) && !current.action && (
                 <button
                   type="button"
-                  onClick={() => goTo(step + 1)}
+                  onClick={() => {
+                    if (blocked) closeDialog();
+                    goTo(step + 1);
+                  }}
                   className="ml-auto flex min-h-8 items-center gap-1 text-[11px] font-semibold text-bd-mute transition-colors hover:text-bd-navy"
                 >
                   Skip <ArrowRight className="size-3" />

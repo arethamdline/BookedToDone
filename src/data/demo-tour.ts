@@ -30,6 +30,11 @@ export type TourStep = {
    * shouldn't be interrupted a third of a second in.
    */
   advanceAfter?: number;
+  /**
+   * This step is read, not pressed — the tour moves on from the card's own
+   * button, and that button shuts whatever dialog the step is inside first.
+   */
+  closesDialog?: boolean;
   /** The last step closes the tour out with a call to action. */
   finish?: boolean;
 };
@@ -99,6 +104,17 @@ export const tour: TourStep[] = [
     body: "Same job, your side. Address, items, window and price are already filled in — every one of them came from the customer. Nobody in your office typed a thing.",
     target: '[data-tour="needs-attention"]',
     prompt: "Open the booking that just came in",
+  },
+  {
+    id: "job-card",
+    route: "/staff",
+    side: "staff",
+    title: "Nothing on this card was typed",
+    body: "Address, items, pickup window, the quote, even which channel they came in on — all of it arrived with the booking. Your office keyed in none of it.",
+    target: '[data-tour="booking-detail"]',
+    prompt: "Read down the card",
+    action: "Close it and carry on",
+    closesDialog: true,
   },
   {
     id: "summary",

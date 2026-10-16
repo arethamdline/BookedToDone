@@ -27,7 +27,10 @@ export function DemoTopBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-[60] bg-bd-navy text-white">
+      {/* `data-tour-allow`: the guided tour swallows clicks outside the step it
+          is pointing at, but never here — exiting the demo or switching sides
+          has to stay possible at every step. */}
+      <header data-tour-allow className="sticky top-0 z-[60] bg-bd-navy text-white">
         <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-2.5 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             <img
