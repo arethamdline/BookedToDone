@@ -56,13 +56,13 @@ export const features: Feature[] = [
     tagline: "Answers at 9 pm, in your prices.",
     icon: Bot,
     partner: "inbox",
-    problem: "The call you miss at 9 pm is the job someone else books at 9:05.",
+    problem: "The message you don't see until morning is the job someone else booked at 9:05 pm.",
     does: [
       "Answers from your price list and service area — not a generic chatbot.",
       "Books the job outright, or captures the lead with the full conversation attached.",
       "Says when it doesn't know, and hands the thread to you instead of guessing.",
     ],
-    proof: { value: "24/7", label: "answered without hiring" },
+    proof: { value: "24/7", label: "replies without hiring" },
     next: {
       title: "Lands in your inbox",
       line: "The thread arrives as a lead with the address, the items discussed and the quoted range already filled in.",
@@ -302,7 +302,7 @@ export function getFeature(slug: string) {
 
 /** The six pains from the demo video, each pointing at the thing that fixes it. */
 export const problems: { label: string; slug: string }[] = [
-  { label: "Missed calls", slug: "ai-assistant" },
+  { label: "Enquiries you reply to late", slug: "ai-assistant" },
   { label: "Slow quotes", slug: "photo-estimate" },
   { label: "Endless texting", slug: "reminders" },
   { label: "Bookings that fall through", slug: "booking-deposit" },

@@ -3,6 +3,7 @@ import { ArrowRight, Check, RotateCcw, Sparkles } from "lucide-react";
 
 import { PhoneFrame, LaptopFrame } from "./device-frame";
 import { featureDemos, type Line } from "@/data/feature-demos";
+import { photoSamples } from "@/data/photo-samples";
 import { cn } from "@/lib/utils";
 
 /**
@@ -99,6 +100,45 @@ function Scene({ lines }: { lines: Line[] }) {
                 <span>{line.text}</span>
               </div>
             );
+
+          case "scan": {
+            // The actual sample photo and the actual boxes the booking flow
+            // draws, so the feature page shows the thing itself rather than a
+            // word-picture of it.
+            const sample = photoSamples[line.sample]!;
+            return (
+              <div key={i} className="relative shrink-0 overflow-hidden rounded-md">
+                <img
+                  src={sample.src}
+                  alt={sample.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[16/11] w-full object-cover"
+                />
+                {line.boxes === false ? (
+                  <span className="bd-scanline absolute inset-x-0 h-0.5 bg-gradient-to-r from-bd-ai-from to-bd-ai-to shadow-[0_0_12px_3px_rgba(124,58,237,0.6)]" />
+                ) : (
+                  sample.detections.map((d, n) => (
+                    <span
+                      key={d.id}
+                      className="bd-box-in absolute rounded-sm border border-bd-ai-to"
+                      style={{
+                        left: `${d.box[0]}%`,
+                        top: `${d.box[1]}%`,
+                        width: `${d.box[2]}%`,
+                        height: `${d.box[3]}%`,
+                        animationDelay: `${n * 0.22}s`,
+                      }}
+                    >
+                      <span className="bd-ai-gradient absolute -top-3.5 left-0 whitespace-nowrap rounded px-1 text-[8px] font-bold text-white">
+                        {d.label}
+                      </span>
+                    </span>
+                  ))
+                )}
+              </div>
+            );
+          }
 
           case "big":
             return (

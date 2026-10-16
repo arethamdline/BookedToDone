@@ -53,9 +53,9 @@ function LandingPage() {
               <span className="text-bd-blue">Book more jobs.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-bd-body sm:text-base">
-              The AI answers every call and books the job — even at 9 pm. It arrives in your office
-              already filled in, so nobody types it up twice. Built around how your business already
-              runs.
+              The AI answers every message and books the job — even at 9 pm, while you're on a
+              ladder. It arrives in your office already filled in, so nobody types it up twice.
+              Built around how your business already runs.
             </p>
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">

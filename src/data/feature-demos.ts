@@ -12,7 +12,13 @@ export type Line =
   | { k: "banner"; text: string; tone: "ai" | "done" | "warn" }
   | { k: "big"; label: string; value: string; note?: string }
   | { k: "item"; text: string; done?: boolean }
-  | { k: "title"; text: string };
+  | { k: "title"; text: string }
+  /**
+   * The real sample photo with its real detection boxes, the same scan the
+   * booking flow runs. `boxes: false` shows the bare photo, for the step
+   * before the AI has read it.
+   */
+  | { k: "scan"; sample: number; boxes?: boolean };
 
 export type Step = {
   lines: Line[];
@@ -66,10 +72,17 @@ export const featureDemos: Record<string, Step[]> = {
     },
   ],
 
+  /*
+   * Driven by the real sample photo. The items and the price come from
+   * `photo-samples.ts`, the same list the booking flow scans: 3 chairs, a metal
+   * tub, a wooden table and a bench seat, $195 — plus the $65 mattress the
+   * customer adds here, so $260 before the range.
+   */
   "photo-estimate": [
     {
       lines: [
         { k: "title", text: "Your photo" },
+        { k: "scan", sample: 0, boxes: false },
         { k: "banner", text: "Reading the photo…", tone: "ai" },
       ],
       action: "See what it found",
@@ -77,19 +90,22 @@ export const featureDemos: Record<string, Step[]> = {
     {
       lines: [
         { k: "title", text: "What we found" },
-        { k: "item", text: "1 × Sofa", done: true },
-        { k: "item", text: "1 × Dining table", done: true },
-        { k: "item", text: "4 × Bags of junk", done: true },
+        { k: "scan", sample: 0 },
+        { k: "item", text: "3 × Chair", done: true },
+        { k: "item", text: "1 × Wooden table", done: true },
+        { k: "item", text: "1 × Bench seat", done: true },
+        { k: "item", text: "1 × Metal tub", done: true },
       ],
       action: "Did it miss anything?",
     },
     {
       lines: [
         { k: "title", text: "Add what we missed" },
-        { k: "item", text: "1 × Sofa", done: true },
-        { k: "item", text: "1 × Dining table", done: true },
-        { k: "item", text: "4 × Bags of junk", done: true },
-        { k: "chat", who: "you", text: "mattress" },
+        { k: "item", text: "3 × Chair", done: true },
+        { k: "item", text: "1 × Wooden table", done: true },
+        { k: "item", text: "1 × Bench seat", done: true },
+        { k: "item", text: "1 × Metal tub", done: true },
+        { k: "chat", who: "you", text: "there's a mattress inside too" },
       ],
       action: "Add it",
     },
@@ -99,14 +115,13 @@ export const featureDemos: Record<string, Step[]> = {
         {
           k: "big",
           label: "Your estimate",
-          value: "$289–349",
+          value: "$260–312",
           note: "A range, not a number you'll be held to.",
         },
         { k: "banner", text: "Sent to the office as a job card", tone: "done" },
       ],
     },
   ],
-
   "booking-deposit": [
     {
       lines: [

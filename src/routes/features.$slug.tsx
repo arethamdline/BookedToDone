@@ -81,15 +81,23 @@ function FeaturePage() {
               <span className="text-sm font-medium text-bd-body">{feature.proof.label}</span>
             </div>
 
+            {/* Same shape as the wrap-up at the end of the guided demo: the
+                button says what pressing it does, the line under it says what
+                the meeting is for. */}
             <div className="mt-7">
               <a
                 href={bookingHrefFor(
                   `${feature.title} — how would this fit my business?`,
                   prospect,
                 )}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-bd-blue px-5 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink"
+                className="block max-w-xs rounded-xl bg-bd-blue px-5 py-3 text-center text-white transition-colors hover:bg-bd-blue-ink"
               >
-                Learn how I can add this <ArrowRight className="size-4" />
+                <span className="flex items-center justify-center gap-2 font-display text-[15px] font-bold">
+                  Book a meeting <ArrowRight className="size-4" />
+                </span>
+                <span className="mt-0.5 block text-xs font-medium leading-snug text-white/75">
+                  Learn how we'd add this to your operation
+                </span>
               </a>
             </div>
           </div>

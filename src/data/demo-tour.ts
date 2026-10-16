@@ -47,7 +47,7 @@ export const tour: TourStep[] = [
     route: "/customer",
     side: "customer",
     title: "It answers at 9 pm",
-    body: "Ask it anything and it replies from this company's own price list and service area. The call you miss at 9 pm is the job someone else books at 9:05.",
+    body: "Ask it anything and it replies from this company's own price list and service area. The message you'd have answered in the morning is a job someone else booked at 9:05 pm.",
     target: '[data-tour="assistant-card"]',
     prompt: "Ask it something — or tap one of the suggestions",
     action: "Now let's book a job",

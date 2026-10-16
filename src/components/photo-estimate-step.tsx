@@ -3,6 +3,7 @@ import { Camera, Check, Loader2, Plus, Sparkles, Upload } from "lucide-react";
 
 import { Button } from "./ui/button";
 import { company } from "@/data/company";
+import { estimateFor, photoSamples, priceFor, tally } from "@/data/photo-samples";
 
 /**
  * The headline feature: a photo becomes a priced item list.
@@ -12,61 +13,6 @@ import { company } from "@/data/company";
  * never has items invented for it — this demo has no vision model behind it, so
  * it says so and sends them to the confirm step to list items themselves.
  */
-
-/**
- * One box drawn on the photo. `item` is the id of the price-list entry it is
- * charged as, so several boxes can be the same kind of thing (six bags = six
- * boxes, one line on the estimate).
- */
-type Detection = {
-  id: string;
-  /** Price-list id in `company.pricing.items`. */
-  item: string;
-  label: string;
-  /** Percentages: left, top, width, height. */
-  box: [number, number, number, number];
-};
-
-/**
- * Every box below was placed against the actual photo. Nothing is labelled
- * that isn't visibly in the shot — a scan that finds a sofa in a photo with no
- * sofa in it is the fastest way to lose a prospect.
- */
-const SAMPLES: { src: string; alt: string; title: string; detections: Detection[] }[] = [
-  {
-    src: "/images/household-junk.webp",
-    alt: "Old chairs, a wooden table and a bench stacked outside a house",
-    title: "Household clear-out",
-    detections: [
-      { id: "c1", item: "chair", label: "Chair", box: [1, 50, 19, 48] },
-      { id: "c2", item: "chair", label: "Chair", box: [14, 40, 18, 55] },
-      { id: "c3", item: "chair", label: "Chair", box: [28, 62, 17, 38] },
-      { id: "tub", item: "washtub", label: "Metal tub", box: [23, 25, 15, 20] },
-      { id: "tbl", item: "table", label: "Wooden table", box: [46, 60, 42, 32] },
-      { id: "bch", item: "bench", label: "Bench seat", box: [64, 45, 18, 25] },
-    ],
-  },
-  {
-    src: "/images/yard-cleanout.webp",
-    alt: "Six tied bags of yard waste on a back lawn",
-    title: "Yard clear-out",
-    detections: [
-      { id: "b1", item: "yardbag", label: "Yard waste", box: [2, 29, 18, 33] },
-      { id: "b2", item: "yardbag", label: "Yard waste", box: [1, 44, 21, 36] },
-      { id: "b3", item: "yardbag", label: "Yard waste", box: [19, 33, 15, 22] },
-      { id: "b4", item: "yardbag", label: "Yard waste", box: [18, 50, 24, 35] },
-      { id: "b5", item: "yardbag", label: "Yard waste", box: [33, 36, 15, 36] },
-      { id: "b6", item: "yardbag", label: "Yard waste", box: [45, 38, 16, 37] },
-    ],
-  },
-];
-
-/** Detections collapsed into the priced lines they become. */
-function tally(detections: Detection[]) {
-  const counts = new Map<string, number>();
-  for (const d of detections) counts.set(d.item, (counts.get(d.item) ?? 0) + 1);
-  return counts;
-}
 
 type Phase = "choose" | "scanning" | "result" | "unscannable";
 
@@ -97,14 +43,14 @@ export function PhotoEstimateStep({
     return () => t.forEach(clearTimeout);
   }, []);
 
-  const sample = picked === null ? null : SAMPLES[picked]!;
+  const sample = picked === null ? null : photoSamples[picked]!;
 
   const runScan = (index: number) => {
     setPicked(index);
     setRevealed(0);
     setPhase("scanning");
     setCaption("Reading the photo…");
-    const found = SAMPLES[index]!.detections;
+    const found = photoSamples[index]!.detections;
     timers.current.forEach(clearTimeout);
     timers.current = [];
     found.forEach((_, i) => {
@@ -123,15 +69,11 @@ export function PhotoEstimateStep({
     setPhase("unscannable");
   };
 
-  const priceFor = (id: string) => company.pricing.items.find((i) => i.id === id);
-
-  const lines = [...tally(sample?.detections ?? [])];
+  const lines = tally(sample?.detections ?? []);
 
   const confirmWith = (addMore: boolean) => onConfirm(Object.fromEntries(lines), addMore);
 
-  const subtotal = lines.reduce((sum, [item, n]) => sum + (priceFor(item)?.price ?? 0) * n, 0);
-  const low = Math.max(subtotal, company.pricing.minimum);
-  const high = Math.round(low * 1.2);
+  const { subtotal, low, high } = estimateFor(lines);
 
   /* ---------------------------------------------------------------- choose */
   if (phase === "choose")
@@ -139,7 +81,7 @@ export function PhotoEstimateStep({
       <div className="space-y-5">
         <Header />
         <div data-tour="photo-samples" className="grid gap-3 sm:grid-cols-2">
-          {SAMPLES.map((s, i) => (
+          {photoSamples.map((s, i) => (
             <button
               key={s.src}
               type="button"

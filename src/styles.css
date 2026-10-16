@@ -303,6 +303,22 @@ textarea {
   animation: bd-nudge 1.4s ease-in-out infinite;
 }
 
+/* Detection boxes landing on the sample photo, one after another. */
+@keyframes bd-box-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bd-box-in {
+  animation: bd-box-in 0.3s ease-out backwards;
+}
+
 /* The hand-off between the two halves of the guided demo, and the finale. */
 @keyframes bd-handover {
   0% {
@@ -374,6 +390,7 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bd-box-in,
   .bd-dash,
   .bd-handover,
   .bd-nudge,
