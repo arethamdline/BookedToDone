@@ -237,7 +237,7 @@ export function communication(channel: Communication["channel"], text: string): 
     status: channel === "Phone" || channel === "Note" ? "Recorded" : "Simulated",
   };
 }
-export function saveJob(draft: Job) {
+export function saveJob(draft: Job, staffOverride = false) {
   let saved: Job | undefined;
   changeData((d) => {
     const repeat =
@@ -268,13 +268,19 @@ export function saveJob(draft: Job) {
       email: draft.email.trim().toLowerCase(),
       customerId,
       volume: q.volume,
-      estimate: existing ? existing.estimate : q.estimate,
-      originalEstimate: existing ? existing.originalEstimate : q.estimate,
-      quotedAmount: existing?.quotedAmount ?? null,
-      finalCharge: existing?.finalCharge ?? null,
-      quoteApproved: existing?.quoteApproved ?? false,
+      estimate: existing ? (staffOverride ? draft.estimate : existing.estimate) : q.estimate,
+      originalEstimate: existing?.originalEstimate ?? q.estimate,
+      quotedAmount:
+        existing && !staffOverride ? existing.quotedAmount : (draft.quotedAmount ?? null),
+      finalCharge: existing && !staffOverride ? existing.finalCharge : (draft.finalCharge ?? null),
+      quoteApproved: existing && !staffOverride ? existing.quoteApproved : draft.quoteApproved,
       quoteHistory: existing?.quoteHistory ?? [],
-      priceLines: existing?.priceLines ?? q.lines,
+      priceLines:
+        existing && !staffOverride
+          ? existing.priceLines
+          : draft.priceLines.length
+            ? draft.priceLines
+            : q.lines,
       status: existing ? draft.status : isCustom(draft) ? "Needs Quote" : "Requested",
       createdAt: existing?.createdAt ?? new Date().toISOString(),
       communications: existing

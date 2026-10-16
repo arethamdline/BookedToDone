@@ -66,6 +66,9 @@ export function JunkBookingForm({
   const set = <K extends keyof Job>(key: K, value: Job[K]) =>
     setJob((j) => ({ ...j, [key]: value }));
   const [extraNote, setExtraNote] = useState("");
+  const [manualPrice, setManualPrice] = useState(
+    String(initial?.finalCharge ?? initial?.quotedAmount ?? initial?.estimate ?? 0),
+  );
   const addExtraItem = () => {
     const raw = extraItem.trim();
     if (!raw) return;
@@ -129,20 +132,40 @@ export function JunkBookingForm({
       setError(invalid);
       return;
     }
+    if (
+      manual &&
+      initial?.id &&
+      (!Number.isFinite(Number(manualPrice)) || Number(manualPrice) < 0)
+    ) {
+      setError("Enter a valid price of zero or more.");
+      return;
+    }
     if (step === 3) {
       setStep(4);
       return;
     }
     submitting.current = true;
     try {
-      const record = saveJob({
-        ...job,
-        communications: initial?.id
-          ? job.communications
-          : chatHistory.length
-            ? [...chatHistory, ...job.communications]
-            : job.communications,
-      });
+      const amount = Number(manualPrice);
+      const record = saveJob(
+        {
+          ...job,
+          ...(manual && initial?.id
+            ? {
+                estimate: amount,
+                quotedAmount: job.quotedAmount == null ? null : amount,
+                finalCharge: job.finalCharge == null ? null : amount,
+                priceLines: [{ label: "Staff-adjusted price", amount }],
+              }
+            : {}),
+          communications: initial?.id
+            ? job.communications
+            : chatHistory.length
+              ? [...chatHistory, ...job.communications]
+              : job.communications,
+        },
+        manual && Boolean(initial?.id),
+      );
       setSaved(record);
       onSaved?.(record);
     } catch (e) {
@@ -641,6 +664,60 @@ export function JunkBookingForm({
                     </label>
                   )}
                 </div>
+                {manual && initial?.id && (
+                  <section className="space-y-4 rounded-md border bg-muted/30 p-4">
+                    <div>
+                      <h3 className="text-sm font-semibold">Staff overrides</h3>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Customer-submitted estimate: {money(initial.originalEstimate)}. Your changes
+                        remain in this demo.
+                      </p>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <label className="block text-sm font-semibold">
+                        Assigned crew
+                        <select
+                          className={input}
+                          value={job.crew}
+                          onChange={(e) => set("crew", e.target.value)}
+                        >
+                          <option value="">Unassigned</option>
+                          {data.crews.map((crew) => (
+                            <option key={crew.id} value={crew.id}>
+                              {crew.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="block text-sm font-semibold">
+                        Assigned truck
+                        <select
+                          className={input}
+                          value={job.truck}
+                          onChange={(e) => set("truck", e.target.value)}
+                        >
+                          <option value="">Unassigned</option>
+                          {data.trucks.map((truck) => (
+                            <option key={truck.id} value={truck.id}>
+                              {truck.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="block text-sm font-semibold">
+                        Staff price ($)
+                        <input
+                          className={input}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={manualPrice}
+                          onChange={(e) => setManualPrice(e.target.value)}
+                        />
+                      </label>
+                    </div>
+                  </section>
+                )}
                 <label className="block text-sm font-semibold">
                   Additional notes
                   <textarea
