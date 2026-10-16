@@ -25,12 +25,6 @@ export type TourStep = {
   /** Label for the advance button on steps with nothing to press. */
   action?: string;
   /**
-   * How long to let the visitor watch after they press the lit element, before
-   * the tour moves on. The scan, for one, is the whole point of its step — it
-   * shouldn't be interrupted a third of a second in.
-   */
-  advanceAfter?: number;
-  /**
    * This step is read, not pressed — the tour moves on from the card's own
    * button, and that button shuts whatever dialog the step is inside first.
    */
@@ -55,7 +49,8 @@ export const tour: TourStep[] = [
     title: "It answers at 9 pm",
     body: "Ask it anything and it replies from this company's own price list and service area. The call you miss at 9 pm is the job someone else books at 9:05.",
     target: '[data-tour="assistant-card"]',
-    prompt: "Open the assistant and ask it something",
+    prompt: "Ask it something — or tap one of the suggestions",
+    action: "Now let's book a job",
   },
   {
     id: "start-booking",
@@ -73,8 +68,8 @@ export const tour: TourStep[] = [
     title: "A photo becomes a price",
     body: "The AI reads what's actually in the shot, boxes each item and comes back with a range. No site visit, no phone tag.",
     target: '[data-tour="photo-samples"]',
-    prompt: "Pick one of the two photos",
-    advanceAfter: 4200,
+    prompt: "Pick a photo and watch it read the pile",
+    action: "Next: did we miss anything?",
   },
   {
     id: "missed",

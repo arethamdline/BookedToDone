@@ -28,6 +28,9 @@ const FINISHED_KEY = "bd-demo-tour-finished";
 /** Height the guide occupies, so the AI launcher can sit clear of it. */
 const GUIDE_VAR = "--bd-guide-h";
 
+/** What counts as "the visitor pressed the thing" inside a highlighted area. */
+const CONTROLS = 'button, a[href], input, select, textarea, [role="button"], [role="link"]';
+
 type Rect = { top: number; left: number; width: number; height: number };
 
 /** An open modal, if there is one. Radix marks the live one `data-state="open"`. */
@@ -243,22 +246,16 @@ export function DemoGuide() {
     if (!live || blocked || current.finish || current.action) return;
     const onClick = (e: MouseEvent) => {
       const el = document.querySelector(current.target!);
-      if (el && e.target instanceof Node && el.contains(e.target)) {
-        window.setTimeout(() => goTo(step + 1), current.advanceAfter ?? 350);
-      }
+      if (!el || !(e.target instanceof Element) || !el.contains(e.target)) return;
+      // Only a real control counts as having done the step. A target is often a
+      // container, and a click on the padding between its buttons is not the
+      // visitor finishing anything.
+      if (!e.target.closest(CONTROLS)) return;
+      window.setTimeout(() => goTo(step + 1), 350);
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [
-    live,
-    blocked,
-    current.target,
-    current.finish,
-    current.action,
-    current.advanceAfter,
-    step,
-    goTo,
-  ]);
+  }, [live, blocked, current.target, current.finish, current.action, step, goTo]);
 
   /**
    * While a step is pointing at something, clicks anywhere else are swallowed.
