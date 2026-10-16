@@ -318,7 +318,6 @@ function LandingPage() {
       <section className="border-b border-bd-navy/10 bg-bd-paper">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <SectionLabel>Who you're talking to</SectionLabel>
-          {/* TODO: swap Aretha's initials for a photo once an approved image is in /public. */}
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
               {
@@ -326,12 +325,14 @@ function LandingPage() {
                 initials: "JH",
                 title: "Founder",
                 photo: "/brand/jerry-huang.webp",
+                photoClassName: "",
               },
               {
-                name: "Aretha Madeline Budiman",
+                name: "Aretha Madeline",
                 initials: "AB",
                 title: "Chief Technology Officer",
-                photo: null,
+                photo: "/brand/aretha-madeline.png",
+                photoClassName: "scale-[1.12] object-[50%_35%]",
               },
             ].map((founder) => (
               <div
@@ -339,16 +340,18 @@ function LandingPage() {
                 className="flex items-center gap-4 rounded-xl border border-bd-navy/10 bg-white p-5"
               >
                 {founder.photo ? (
-                  <img
-                    src={founder.photo}
-                    alt=""
-                    aria-hidden="true"
-                    width="320"
-                    height="320"
-                    loading="lazy"
-                    decoding="async"
-                    className="size-16 shrink-0 rounded-full object-cover"
-                  />
+                  <div className="size-16 shrink-0 overflow-hidden rounded-full">
+                    <img
+                      src={founder.photo}
+                      alt=""
+                      aria-hidden="true"
+                      width="320"
+                      height="320"
+                      loading="lazy"
+                      decoding="async"
+                      className={`size-full object-cover ${founder.photoClassName}`}
+                    />
+                  </div>
                 ) : (
                   <span
                     aria-hidden="true"
