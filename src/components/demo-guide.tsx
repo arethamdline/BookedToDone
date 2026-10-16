@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useRouter, useRouterState } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
  */
 const COLLAPSED_KEY = "bd-demo-guide-dismissed";
 const STEP_KEY = "bd-demo-tour-step";
+const FINISHED_KEY = "bd-demo-tour-finished";
 
 /** Height the guide occupies, so the AI launcher can sit clear of it. */
 const GUIDE_VAR = "--bd-guide-h";
@@ -91,11 +92,17 @@ export function DemoGuide() {
   const navigating = useRef(false);
   /** Saved position restored. Until then there is nothing to follow. */
   const [ready, setReady] = useState(false);
+  /** Showing the hand-off between the demo's two halves. */
+  const [handover, setHandover] = useState(false);
+  /** The visitor has reached the end and asked to see the wrap-up. */
+  const [finished, setFinished] = useState(false);
+  const shownSide = useRef<"customer" | "staff" | null>(null);
 
   useEffect(() => {
     setCollapsed(read(COLLAPSED_KEY) === "1");
     const saved = Number(read(STEP_KEY));
     if (Number.isInteger(saved) && saved > 0 && saved < tourLength) setStep(saved);
+    setFinished(read(FINISHED_KEY) === "1");
     setReady(true);
   }, []);
 
@@ -115,7 +122,7 @@ export function DemoGuide() {
 
   const current = tour[step]!;
   const onThisRoute = current.route === pathname;
-  const live = !collapsed && !!current.target && onThisRoute;
+  const live = !collapsed && !handover && !!current.target && onThisRoute;
 
   /**
    * The visitor can move themselves — the demo bar switches sides at any step.
@@ -138,6 +145,24 @@ export function DemoGuide() {
     setStep(i);
     write(STEP_KEY, String(i));
   }, [ready, pathname, current.route, step]);
+
+  /**
+   * Crossing from the customer's half to the office half is the point of the
+   * whole demo — the same job turning up on the other side. It used to happen
+   * silently, mid-scroll. Now it announces itself.
+   */
+  useEffect(() => {
+    if (!ready || collapsed) return;
+    if (shownSide.current === null) {
+      shownSide.current = current.side;
+      return;
+    }
+    if (shownSide.current === current.side) return;
+    shownSide.current = current.side;
+    setHandover(true);
+    const id = window.setTimeout(() => setHandover(false), 2200);
+    return () => clearTimeout(id);
+  }, [ready, collapsed, current.side]);
 
   const measure = useCallback(() => {
     if (!live) {
@@ -209,9 +234,13 @@ export function DemoGuide() {
    * Pressing the highlighted thing is what moves the tour on. Capture phase so
    * we see the click whatever the element does with it, and a tick's delay so
    * the element's own handler (navigate, open, scan) runs first.
+   *
+   * Only on steps with no `action`. A step that offers a button is one to look
+   * at rather than press through: opening the office assistant used to whip the
+   * visitor to the next step before it had finished answering them.
    */
   useEffect(() => {
-    if (!live || blocked || current.finish || current.closesDialog) return;
+    if (!live || blocked || current.finish || current.action) return;
     const onClick = (e: MouseEvent) => {
       const el = document.querySelector(current.target!);
       if (el && e.target instanceof Node && el.contains(e.target)) {
@@ -225,7 +254,7 @@ export function DemoGuide() {
     blocked,
     current.target,
     current.finish,
-    current.closesDialog,
+    current.action,
     current.advanceAfter,
     step,
     goTo,
@@ -277,6 +306,70 @@ export function DemoGuide() {
 
   if (!tour.some((s) => pathname === s.route || pathname.startsWith(`${s.route}/`))) return null;
 
+  /**
+   * The wrap-up. Centre of screen, because finishing the demo is the one moment
+   * the tour is allowed to be the whole page — and because the three things a
+   * visitor might want next deserve to be asked plainly rather than buried in a
+   * corner card.
+   */
+  if (finished)
+    return (
+      <div className="pointer-events-auto fixed inset-0 z-[90] grid place-items-center overflow-y-auto bg-bd-navy/75 px-5 py-8 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="You've finished the demo"
+          className="bd-rise w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+        >
+          <span className="bd-pop mx-auto grid size-14 place-items-center rounded-full bg-bd-done-tint">
+            <Check className="size-7 text-bd-green" strokeWidth={3} />
+          </span>
+          <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-bd-mute">
+            Demo complete · {tourLength} of {tourLength}
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight text-bd-navy">
+            That's the whole loop.
+          </h2>
+          <p className="mt-2.5 text-sm leading-relaxed text-bd-body">
+            One job, both sides, nothing typed twice. The photo your customer sent became the job
+            card your crew works from — and nobody in your office keyed in a thing.
+          </p>
+
+          <div className="mt-6 space-y-2">
+            <a
+              href={bookingHrefFor("Finished the demo — adding this to my business", prospect)}
+              className="block rounded-xl bg-bd-blue px-4 py-3 text-white transition-colors hover:bg-bd-blue-ink"
+            >
+              <span className="flex items-center justify-center gap-1.5 font-display text-sm font-bold">
+                Book a meeting <ArrowRight className="size-4" />
+              </span>
+              <span className="mt-0.5 block text-[11px] font-medium leading-snug text-white/75">
+                Learn how we'd add this to your business
+              </span>
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                setFinished(false);
+                write(FINISHED_KEY, "0");
+                setCollapsedPersisted(true);
+              }}
+              className="block w-full rounded-xl border border-bd-line px-4 py-3 text-sm font-bold text-bd-navy transition-colors hover:border-bd-navy/25 hover:bg-bd-paper"
+            >
+              Explore the demo on my own
+            </button>
+            <Link
+              to="/"
+              onClick={() => write(FINISHED_KEY, "0")}
+              className="block w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-bd-mute transition-colors hover:text-bd-navy"
+            >
+              Exit the demo
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+
   if (collapsed)
     return (
       <button
@@ -305,8 +398,40 @@ export function DemoGuide() {
   const highlightLow = rect ? rect.top + rect.height / 2 > window.innerHeight / 2 : false;
   const pointerAbove = rect ? rect.top + rect.height + 56 > window.innerHeight : false;
 
+  const toStaff = current.side === "staff";
+
   return (
     <>
+      {handover && (
+        <div
+          aria-live="polite"
+          className="pointer-events-none fixed inset-0 z-[90] grid place-items-center bg-bd-navy/75 px-6 backdrop-blur-sm"
+        >
+          <div className="bd-handover w-full max-w-xs rounded-2xl bg-white p-6 text-center shadow-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-bd-mute">
+              {toStaff ? "You've seen the customer's half" : "Back round the other side"}
+            </p>
+            <p className="mt-1.5 font-display text-xl font-extrabold leading-tight text-bd-navy">
+              {toStaff ? "Now your office" : "Now your customer"}
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-bd-body">
+              {toStaff
+                ? "Same job, the other side of the desk. Watch what turns up without anyone typing it."
+                : "Back to what the person booking you actually sees."}
+            </p>
+
+            {/* The two halves, handing over. */}
+            <div className="mt-5 flex items-center justify-center gap-2.5">
+              <Side label="Customer" lit={!toStaff} delay={toStaff ? 0 : 0.35} />
+              <ArrowRight
+                className={cn("size-4 shrink-0 text-bd-blue", !toStaff && "rotate-180")}
+              />
+              <Side label="Your office" lit={toStaff} delay={toStaff ? 0.35 : 0} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {rect && (
         <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
           {/* A spread shadow big enough to cover the viewport dims everything
@@ -398,28 +523,19 @@ export function DemoGuide() {
           <p className="mt-1.5 text-xs leading-relaxed text-bd-body">{current.body}</p>
 
           {current.finish ? (
-            <div className="mt-3 rounded-lg bg-bd-paper p-3">
-              <p className="flex items-center gap-1.5 text-xs font-bold text-bd-blue">
-                <Check className="size-3.5" /> That's the whole loop
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-bd-body">
-                One job, both sides, nothing typed twice. Want to see it with your own jobs and
-                prices in it?
-              </p>
-              <a
-                href={bookingHrefFor("Finished the demo — show me this on my operation", prospect)}
-                className="mt-2.5 flex min-h-10 items-center justify-center gap-1.5 rounded-lg bg-bd-blue px-3 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
-              >
-                Show me this on my operation <ArrowRight className="size-3.5" />
-              </a>
-              <button
-                type="button"
-                onClick={() => setCollapsedPersisted(true)}
-                className="mt-1.5 w-full text-center text-xs font-semibold text-bd-body underline-offset-2 hover:underline"
-              >
-                I'll keep exploring on my own
-              </button>
-            </div>
+            /* The last step still describes the screen it's on. Finishing is a
+               deliberate press, so the wrap-up doesn't cover the inbox the
+               moment the visitor arrives at it. */
+            <button
+              type="button"
+              onClick={() => {
+                setFinished(true);
+                write(FINISHED_KEY, "1");
+              }}
+              className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bd-blue px-3.5 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
+            >
+              That's the tour — wrap up <ArrowRight className="size-3.5" />
+            </button>
           ) : blocked ? (
             /* Something opened over the top of this step. Say so plainly and
                offer the way back, rather than ringing a panel behind a modal. */
@@ -438,17 +554,22 @@ export function DemoGuide() {
               </button>
             </>
           ) : (
+            /* Exactly one thing to do per step, never two boxes competing.
+               A step with no `action` is one you press on the page: the dashed
+               instruction is the whole story. A step with an `action` is one you
+               look at: the lit element is described in plain text, and the
+               button is the only control. */
             <>
-              {/* With something lit on screen, the pill says what to try. The
-                  button below is only there on steps that need an explicit way
-                  on — a step you read rather than press, or one where pressing
-                  the lit thing is optional. */}
-              {rect && (
-                /* Dashed, so it reads as an instruction rather than a filled
-                   chip that looks like a disabled button. */
+              {rect && !current.action && (
                 <p className="mt-3 flex items-start gap-2 rounded-lg border border-dashed border-bd-blue/40 bg-bd-blue-soft/60 px-3 py-2.5 text-xs font-bold leading-snug text-bd-blue-ink">
                   <MousePointerClick className="mt-px size-4 shrink-0 text-bd-blue" />
                   {current.prompt ?? "Click the highlighted part to carry on"}
+                </p>
+              )}
+              {rect && current.action && current.prompt && (
+                <p className="mt-2.5 flex items-start gap-1.5 text-[11px] font-semibold leading-snug text-bd-mute">
+                  <MousePointerClick className="mt-px size-3.5 shrink-0" />
+                  {current.prompt} — then:
                 </p>
               )}
               {(!rect || current.action) && (
@@ -458,12 +579,7 @@ export function DemoGuide() {
                     if (current.closesDialog) closeDialog();
                     goTo(step + 1);
                   }}
-                  className={cn(
-                    "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors",
-                    rect
-                      ? "mt-2 border border-bd-line bg-white text-bd-body hover:border-bd-navy/25 hover:text-bd-navy"
-                      : "mt-3 bg-bd-blue text-white hover:bg-bd-blue-ink",
-                  )}
+                  className="mt-2 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bd-blue px-3.5 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
                 >
                   {current.action ?? "Next"} <ArrowRight className="size-3.5" />
                 </button>
@@ -508,5 +624,20 @@ export function DemoGuide() {
         </div>
       </aside>
     </>
+  );
+}
+
+/** One half of the hand-off chip pair. The one being handed to pops in. */
+function Side({ label, lit, delay }: { label: string; lit: boolean; delay: number }) {
+  return (
+    <span
+      className={cn(
+        "rounded-lg px-2.5 py-1.5 text-[11px] font-bold",
+        lit ? "bd-pop bg-bd-blue text-white" : "bg-bd-chip text-bd-mute",
+      )}
+      style={lit ? { animationDelay: `${delay}s` } : undefined}
+    >
+      {label}
+    </span>
   );
 }

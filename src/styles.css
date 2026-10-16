@@ -275,10 +275,84 @@ button, a, input, select, textarea { touch-action: manipulation; }
   animation: bd-nudge 1.4s ease-in-out infinite;
 }
 
+/* The hand-off between the two halves of the guided demo, and the finale. */
+@keyframes bd-handover {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  12%,
+  78% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+}
+
+.bd-handover {
+  animation: bd-handover 2.2s ease-in-out forwards;
+}
+
+/* The toggle knob sliding from one side to the other. */
+@keyframes bd-slide-knob {
+  0%,
+  25% {
+    transform: translateX(0);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.bd-slide-knob {
+  animation: bd-slide-knob 2.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes bd-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bd-pop {
+  animation: bd-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@keyframes bd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bd-rise {
+  animation: bd-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bd-dash,
+  .bd-handover,
   .bd-nudge,
+  .bd-pop,
   .bd-pulse,
+  .bd-rise,
+  .bd-slide-knob,
   [class*="bd-travel"] {
     animation: none !important;
   }
