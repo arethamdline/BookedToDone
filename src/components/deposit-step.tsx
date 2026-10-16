@@ -79,7 +79,7 @@ export function DepositStep({ job, deposit }: { job: Job; deposit: number }) {
     );
 
   return (
-    <Card>
+    <Card data-tour="deposit">
       <CardContent className="space-y-5 p-5 sm:p-6">
         <div>
           <h2 className="flex items-center gap-2 font-display text-2xl font-bold">

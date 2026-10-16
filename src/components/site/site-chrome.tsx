@@ -11,7 +11,20 @@ import { cn } from "@/lib/utils";
  * are PNGs cropped from the supplied logo sheet; if the original vector turns
  * up, swap the `src` for an `.svg` and this component needs no other change.
  */
-export function SiteBrand({ className, invert }: { className?: string; invert?: boolean }) {
+export function SiteBrand({
+  className,
+  invert,
+  /**
+   * Drop the wordmark on a phone, keeping just the mark. The header needs the
+   * width back so every nav item fits — including "What it does", which used
+   * to disappear below `sm`.
+   */
+  markOnlyOnMobile,
+}: {
+  className?: string;
+  invert?: boolean;
+  markOnlyOnMobile?: boolean;
+}) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <img
@@ -26,6 +39,7 @@ export function SiteBrand({ className, invert }: { className?: string; invert?: 
         className={cn(
           "font-display text-[15px] font-extrabold tracking-tight",
           invert ? "text-white" : "text-bd-navy",
+          markOnlyOnMobile && "hidden sm:inline",
         )}
       >
         Booked to Done
@@ -42,13 +56,13 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-bd-navy/10 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link to="/" search={search} className="shrink-0">
-          <SiteBrand />
+          <SiteBrand markOnlyOnMobile />
         </Link>
 
         <nav className="ml-auto flex items-center gap-1 sm:gap-2">
           <a
             href="#system"
-            className="hidden min-h-11 items-center rounded-md px-3 text-sm font-semibold text-bd-navy transition-colors hover:bg-bd-paper sm:inline-flex"
+            className="inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-2.5 text-[13px] font-semibold text-bd-navy transition-colors hover:bg-bd-paper sm:px-3 sm:text-sm"
           >
             What it does
           </a>

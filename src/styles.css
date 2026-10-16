@@ -260,8 +260,24 @@ button, a, input, select, textarea { touch-action: manipulation; }
   animation: bd-pulse-ring 2.2s ease-out infinite;
 }
 
+/* The "click here" pointer on a guided-tour step. */
+@keyframes bd-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.bd-nudge {
+  animation: bd-nudge 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bd-dash,
+  .bd-nudge,
   .bd-pulse,
   [class*="bd-travel"] {
     animation: none !important;

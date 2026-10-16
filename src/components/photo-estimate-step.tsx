@@ -13,36 +13,60 @@ import { company } from "@/data/company";
  * it says so and sends them to the confirm step to list items themselves.
  */
 
+/**
+ * One box drawn on the photo. `item` is the id of the price-list entry it is
+ * charged as, so several boxes can be the same kind of thing (six bags = six
+ * boxes, one line on the estimate).
+ */
 type Detection = {
   id: string;
+  /** Price-list id in `company.pricing.items`. */
+  item: string;
   label: string;
-  count: number;
+  /** Percentages: left, top, width, height. */
   box: [number, number, number, number];
 };
 
+/**
+ * Every box below was placed against the actual photo. Nothing is labelled
+ * that isn't visibly in the shot — a scan that finds a sofa in a photo with no
+ * sofa in it is the fastest way to lose a prospect.
+ */
 const SAMPLES: { src: string; alt: string; title: string; detections: Detection[] }[] = [
   {
     src: "/images/household-junk.webp",
-    alt: "Assorted household furniture ready to be cleared",
+    alt: "Old chairs, a wooden table and a bench stacked outside a house",
     title: "Household clear-out",
     detections: [
-      { id: "sofa", label: "Sofa", count: 1, box: [8, 38, 46, 44] },
-      { id: "table", label: "Dining table", count: 1, box: [54, 30, 36, 38] },
-      { id: "bags", label: "Bags of junk", count: 4, box: [14, 72, 30, 22] },
+      { id: "c1", item: "chair", label: "Chair", box: [1, 50, 19, 48] },
+      { id: "c2", item: "chair", label: "Chair", box: [14, 40, 18, 55] },
+      { id: "c3", item: "chair", label: "Chair", box: [28, 62, 17, 38] },
+      { id: "tub", item: "washtub", label: "Metal tub", box: [23, 25, 15, 20] },
+      { id: "tbl", item: "table", label: "Wooden table", box: [46, 60, 42, 32] },
+      { id: "bch", item: "bench", label: "Bench seat", box: [64, 45, 18, 25] },
     ],
   },
   {
-    src: "/images/garage-yard-junk.webp",
-    alt: "Wheelbarrow beside a pile of branches and yard debris",
+    src: "/images/yard-cleanout.webp",
+    alt: "Six tied bags of yard waste on a back lawn",
     title: "Yard clear-out",
-    // Only what is genuinely visible in this photo: yard waste and a barrow.
-    // TODO: swap in a fuller garage photo and widen this list to match it.
     detections: [
-      { id: "debris", label: "Yard waste containers", count: 2, box: [10, 44, 44, 44] },
-      { id: "bags", label: "Bags of junk", count: 4, box: [56, 54, 32, 34] },
+      { id: "b1", item: "yardbag", label: "Yard waste", box: [2, 29, 18, 33] },
+      { id: "b2", item: "yardbag", label: "Yard waste", box: [1, 44, 21, 36] },
+      { id: "b3", item: "yardbag", label: "Yard waste", box: [19, 33, 15, 22] },
+      { id: "b4", item: "yardbag", label: "Yard waste", box: [18, 50, 24, 35] },
+      { id: "b5", item: "yardbag", label: "Yard waste", box: [33, 36, 15, 36] },
+      { id: "b6", item: "yardbag", label: "Yard waste", box: [45, 38, 16, 37] },
     ],
   },
 ];
+
+/** Detections collapsed into the priced lines they become. */
+function tally(detections: Detection[]) {
+  const counts = new Map<string, number>();
+  for (const d of detections) counts.set(d.item, (counts.get(d.item) ?? 0) + 1);
+  return counts;
+}
 
 type Phase = "choose" | "scanning" | "result" | "unscannable";
 
@@ -84,12 +108,12 @@ export function PhotoEstimateStep({
     timers.current.forEach(clearTimeout);
     timers.current = [];
     found.forEach((_, i) => {
-      timers.current.push(window.setTimeout(() => setRevealed(i + 1), 900 + i * 520));
+      timers.current.push(window.setTimeout(() => setRevealed(i + 1), 700 + i * 260));
     });
     timers.current.push(
-      window.setTimeout(() => setCaption("Estimating load size…"), 900 + found.length * 520),
+      window.setTimeout(() => setCaption("Estimating load size…"), 700 + found.length * 260),
     );
-    timers.current.push(window.setTimeout(() => setPhase("result"), 1500 + found.length * 520));
+    timers.current.push(window.setTimeout(() => setPhase("result"), 1300 + found.length * 260));
   };
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,17 +125,11 @@ export function PhotoEstimateStep({
 
   const priceFor = (id: string) => company.pricing.items.find((i) => i.id === id);
 
-  const confirmWith = (addMore: boolean) =>
-    onConfirm(
-      Object.fromEntries((sample?.detections ?? []).map((d) => [d.id, d.count])) as Record<
-        string,
-        number
-      >,
-      addMore,
-    );
+  const lines = [...tally(sample?.detections ?? [])];
 
-  const subtotal =
-    sample?.detections.reduce((sum, d) => sum + (priceFor(d.id)?.price ?? 0) * d.count, 0) ?? 0;
+  const confirmWith = (addMore: boolean) => onConfirm(Object.fromEntries(lines), addMore);
+
+  const subtotal = lines.reduce((sum, [item, n]) => sum + (priceFor(item)?.price ?? 0) * n, 0);
   const low = Math.max(subtotal, company.pricing.minimum);
   const high = Math.round(low * 1.2);
 
@@ -227,7 +245,7 @@ export function PhotoEstimateStep({
             }}
           >
             <span className="bd-ai-gradient absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-bold text-white">
-              {d.count} × {d.label}
+              {d.label}
             </span>
           </span>
         ))}
@@ -245,14 +263,14 @@ export function PhotoEstimateStep({
               What we found
             </p>
             <ul className="mt-3 space-y-2">
-              {detections.map((d) => (
-                <li key={d.id} className="flex items-center justify-between gap-3 text-sm">
+              {lines.map(([item, n]) => (
+                <li key={item} className="flex items-center justify-between gap-3 text-sm">
                   <span className="flex items-center gap-2">
                     <Check className="size-4 shrink-0 text-bd-green" />
-                    {d.count} × {d.label}
+                    {n} × {priceFor(item)?.name ?? item}
                   </span>
                   <span className="font-semibold tabular-nums text-muted-foreground">
-                    ${((priceFor(d.id)?.price ?? 0) * d.count).toFixed(0)}
+                    ${((priceFor(item)?.price ?? 0) * n).toFixed(0)}
                   </span>
                 </li>
               ))}
@@ -265,12 +283,14 @@ export function PhotoEstimateStep({
                 ${low}–{high}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                A range, not a number you'll be held to. Final price is agreed on site.
+                {subtotal < company.pricing.minimum
+                  ? `These items come to $${subtotal}, under the $${company.pricing.minimum} minimum pickup — so the minimum is what's quoted.`
+                  : "A range, not a number you'll be held to. Final price is agreed on site."}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div data-tour="scan-actions" className="flex flex-wrap gap-2">
             <Button type="button" onClick={() => confirmWith(false)}>
               Looks right <Check className="size-4" />
             </Button>

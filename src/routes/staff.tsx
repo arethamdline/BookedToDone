@@ -280,7 +280,7 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
         />
       </div>
       <Panel title="Needs your attention">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div data-tour="needs-attention" className="grid gap-3 sm:grid-cols-2">
           {data.jobs
             .filter(
               (j) =>

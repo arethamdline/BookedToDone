@@ -1,14 +1,14 @@
 /**
  * The guided tour through the demo.
  *
- * This replaces a four-step, route-matched guide that only said "you're on the
- * customer side" / "you're on the staff side" and left the visitor to find
- * everything themselves. Each step now names one thing, points at the element
- * that does it, and says what to press.
+ * Each step names one thing, points at the element that does it, and says what
+ * to press. Where a step has a `target`, the page dims around that element and
+ * pressing it is what advances the tour — so there is only ever one thing to
+ * do, and it is the lit one.
  *
  * `target` is a CSS selector. When it matches something on screen the guide
- * rings it and shows a "tap here" pointer; when it doesn't, the step still
- * reads fine as plain instruction.
+ * lights it and shows a pointer; when it doesn't, the step falls back to the
+ * card's own `action` button and still reads fine as plain instruction.
  */
 
 export type TourStep = {
@@ -18,10 +18,18 @@ export type TourStep = {
   side: "customer" | "staff";
   title: string;
   body: string;
-  /** What to ring and point at. */
+  /** What to light up and point at. */
   target?: string;
-  /** Label for the advance button when the visitor should act first. */
+  /** Said beside the pointer when there is a `target`. Keep it imperative. */
+  prompt?: string;
+  /** Label for the advance button on steps with nothing to press. */
   action?: string;
+  /**
+   * How long to let the visitor watch after they press the lit element, before
+   * the tour moves on. The scan, for one, is the whole point of its step — it
+   * shouldn't be interrupted a third of a second in.
+   */
+  advanceAfter?: number;
   /** The last step closes the tour out with a call to action. */
   finish?: boolean;
 };
@@ -31,52 +39,56 @@ export const tour: TourStep[] = [
     id: "site",
     route: "/customer",
     side: "customer",
-    title: "This is your customer's view",
-    body: "A sample junk-removal company's website — the kind we'd build around your business. Everything from here on is one real job, start to finish.",
-    action: "Show me the AI",
+    title: "You're the customer now",
+    body: "This is a sample junk-removal company's website — the kind we'd build around your business. From here on you're following one real job, start to finish.",
+    action: "Start the tour",
   },
   {
     id: "assistant",
     route: "/customer",
     side: "customer",
     title: "It answers at 9 pm",
-    body: "Ask anything and the assistant replies from this company's own price list and service area. A missed call is a job someone else books.",
+    body: "Ask it anything and it replies from this company's own price list and service area. The call you miss at 9 pm is the job someone else books at 9:05.",
     target: '[data-tour="assistant-card"]',
-    action: "Now let's book a job",
+    prompt: "Open the assistant and ask it something",
   },
   {
     id: "start-booking",
     route: "/customer",
     side: "customer",
-    title: "Start the booking",
-    body: "Your customer doesn't fill in a long form. They send a photo.",
+    title: "No long form to fill in",
+    body: "Your customer doesn't type out an inventory. They send a photo of the pile and the system does the rest.",
     target: '[data-tour="photo-cta"]',
-    action: "Open the booking",
+    prompt: "Press “Get a photo estimate”",
   },
   {
     id: "photo",
     route: "/book",
     side: "customer",
     title: "A photo becomes a price",
-    body: "Pick one of the sample photos. The AI reads what's in the pile, labels each item and comes back with a range — no site visit, no phone tag.",
+    body: "The AI reads what's actually in the shot, boxes each item and comes back with a range. No site visit, no phone tag.",
     target: '[data-tour="photo-samples"]',
-    action: "I've seen the scan",
+    prompt: "Pick one of the two photos",
+    advanceAfter: 4200,
   },
   {
     id: "missed",
     route: "/book",
     side: "customer",
     title: "Nothing gets guessed at",
-    body: "Before anything is booked it asks whether it missed something, and the customer can type an extra item straight in. The list stays theirs.",
-    target: "#missed-item",
-    action: "Next: the slot",
+    body: "Before anything is booked it asks whether it missed something, and the customer can add an item straight in. The list stays theirs, so the price isn't a surprise on the day.",
+    target: '[data-tour="scan-actions"]',
+    prompt: "Confirm the list, or add what it missed",
+    action: "Next: holding the slot",
   },
   {
     id: "deposit",
     route: "/book",
     side: "customer",
     title: "A held slot, not a maybe",
-    body: "They pick a window your crew can actually cover and leave a $50 deposit, credited against the bill. That's the booking done — on their phone, at any hour.",
+    body: "They pick a window your crew can actually cover and leave a deposit, credited against the bill. That's the booking done — on their phone, at any hour.",
+    target: '[data-tour="deposit"]',
+    prompt: "Take the deposit to finish the booking",
     action: "Now see your office",
   },
   {
@@ -84,16 +96,18 @@ export const tour: TourStep[] = [
     route: "/staff",
     side: "staff",
     title: "Your office already has it",
-    body: "The booking is here — address, items, window and price. Every field tagged AUTO came from the customer. Nobody in your office typed a thing.",
-    action: "What else is on this screen?",
+    body: "Same job, your side. Address, items, window and price are already filled in — every one of them came from the customer. Nobody in your office typed a thing.",
+    target: '[data-tour="needs-attention"]',
+    prompt: "Open the booking that just came in",
   },
   {
     id: "summary",
     route: "/staff",
     side: "staff",
     title: "Your week, written up",
-    body: "Jobs booked, what they're worth, what's still unpaid — summarised in plain English, with the charts underneath if you want the detail.",
+    body: "Jobs booked, what they're worth, what's still unpaid — summarised in plain English, with the charts underneath when you want the detail.",
     target: '[data-tour="ai-summary"]',
+    prompt: "Read this week's summary",
     action: "Next: the inbox",
   },
   {
@@ -103,6 +117,7 @@ export const tour: TourStep[] = [
     title: "Ask your own records",
     body: '"Who hasn\'t paid?" "What\'s on today?" It answers from your bookings, and says so when it can\'t — it never invents a number.',
     target: '[data-tour="office-assistant"]',
+    prompt: "Ask it about your jobs",
     action: "Last stop",
   },
   {

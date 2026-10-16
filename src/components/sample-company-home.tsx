@@ -22,13 +22,13 @@ export function SampleCompanyHome() {
       title: "Household junk",
       description: "Furniture, appliances, boxes, and everyday clutter.",
       image: "/images/household-junk.webp",
-      alt: "Assorted household furniture ready to be cleared",
+      alt: "Old chairs, a wooden table and a bench stacked outside a house",
     },
     {
       title: "Garage and yard cleanouts",
       description: "Old gear, branches, and the piles that keep growing.",
-      image: "/images/garage-yard-junk.webp",
-      alt: "Wheelbarrow beside a pile of branches and yard debris",
+      image: "/images/yard-cleanout.webp",
+      alt: "Tied bags of yard waste on a back lawn",
     },
     {
       title: "Construction debris",

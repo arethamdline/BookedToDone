@@ -33,6 +33,22 @@ export const company = {
       { id: "washer", name: "Washer / dryer", category: "Appliances", price: 75, volume: 1.5 },
       { id: "tv", name: "TV / monitor", category: "Electronics", price: 35, volume: 0.4 },
       { id: "bags", name: "Bag of general junk", category: "General junk", price: 12, volume: 0.2 },
+      { id: "chair", name: "Chair", category: "Furniture", price: 25, volume: 0.5 },
+      { id: "bench", name: "Bench / patio seat", category: "Furniture", price: 45, volume: 0.9 },
+      {
+        id: "yardbag",
+        name: "Bag of yard waste",
+        category: "General junk",
+        price: 12,
+        volume: 0.25,
+      },
+      {
+        id: "washtub",
+        name: "Planter / metal tub",
+        category: "General junk",
+        price: 20,
+        volume: 0.3,
+      },
       { id: "desk", name: "Office desk", category: "Office cleanouts", price: 45, volume: 1 },
       {
         id: "debris",
