@@ -12,7 +12,7 @@ export const supportConversationSchema = z.object({
   id: z.string(),
   customer: z.string(),
   contact: z.string(),
-  channel: z.enum(["email", "website"]),
+  channel: z.enum(["email", "website", "whatsapp", "sms", "social"]),
   source: z.literal("Chat").optional(),
   status: z.enum(["needs_staff", "human", "resolved", "bot"]),
   assignee: z.string(),

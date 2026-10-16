@@ -17,11 +17,13 @@ let lastError = "";
 function read(): SupportConversation[] {
   const saved = localStorage.getItem(KEY);
   let items = saved ? schema.parse(JSON.parse(saved)) : createSupportConversations();
-  if (!localStorage.getItem("smart-junk-support-v2-demo")) {
-    const demo = createSupportConversations().find((c) => c.id === "web-james");
-    if (demo && !items.some((c) => c.id === demo.id)) items = [demo, ...items];
+  if (!localStorage.getItem("smart-junk-support-v3-demo")) {
+    const demos = createSupportConversations().filter((c) =>
+      ["web-james", "whatsapp-demo", "sms-demo", "social-demo"].includes(c.id),
+    );
+    items = [...demos.filter((demo) => !items.some((item) => item.id === demo.id)), ...items];
     localStorage.setItem(KEY, JSON.stringify(items));
-    localStorage.setItem("smart-junk-support-v2-demo", "1");
+    localStorage.setItem("smart-junk-support-v3-demo", "1");
   }
   if (!saved) localStorage.setItem(KEY, JSON.stringify(items));
   return items;

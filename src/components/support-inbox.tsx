@@ -12,8 +12,10 @@ import {
   Clock3,
   Globe,
   Inbox,
+  Instagram,
   LockKeyhole,
   MessageCircle,
+  MessageSquare,
   Search,
   Send,
   Smartphone,
@@ -51,15 +53,18 @@ const time = (at: number) =>
     timeZone: "America/Chicago",
   });
 function Channel({ channel }: { channel: SupportConversation["channel"] }) {
-  return channel === "email" ? (
-    <span className="inline-flex items-center gap-1 text-success-strong">
-      <MessageCircle className="size-3" />
-      Email
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 text-info-strong">
-      <Globe className="size-3" />
-      Website
+  const detail = {
+    email: { label: "Email", Icon: MessageCircle, tone: "text-success-strong" },
+    website: { label: "Website", Icon: Globe, tone: "text-info-strong" },
+    whatsapp: { label: "WhatsApp", Icon: Smartphone, tone: "text-success-strong" },
+    sms: { label: "SMS", Icon: MessageSquare, tone: "text-info-strong" },
+    social: { label: "Facebook / Instagram", Icon: Instagram, tone: "text-info-strong" },
+  }[channel];
+  const Icon = detail.Icon;
+  return (
+    <span className={cn("inline-flex items-center gap-1", detail.tone)}>
+      <Icon className="size-3" />
+      {detail.label}
     </span>
   );
 }
@@ -103,7 +108,9 @@ export function SupportInbox() {
               {openCount} open
             </span>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">One team. Every conversation.</p>
+          <p className="mt-1 text-sm font-medium text-muted-foreground">
+            Every channel. One inbox.
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setDemoOpen(true)}>
           <Sparkles className="size-4" />
@@ -112,7 +119,8 @@ export function SupportInbox() {
       </div>
       <div className="mx-5 mb-4 flex items-center gap-2 rounded-md border border-warning-strong/15 bg-warning-soft/60 px-3 py-2 text-xs text-warning-strong lg:mx-7">
         <span className="size-1.5 shrink-0 rounded-full bg-warning-strong" />
-        Demo inbox · Email replies are simulated. Website chats sync in this browser.
+        Demo inbox · Website, Email, WhatsApp, SMS, and Facebook/Instagram examples are simulated.
+        Replies are never sent.
       </div>
       {error && (
         <p
@@ -140,18 +148,21 @@ export function SupportInbox() {
                 className="h-9 w-full rounded-md border bg-background pl-9 pr-3 text-xs outline-none focus:ring-2 focus:ring-ring"
               />
             </label>
-            <div className="flex gap-1 rounded-md bg-muted p-1">
+            <div className="flex flex-wrap gap-1 rounded-md bg-muted p-1">
               {[
                 ["all", "All channels"],
-                ["email", "Email"],
                 ["website", "Website"],
+                ["whatsapp", "WhatsApp"],
+                ["sms", "SMS"],
+                ["social", "Social"],
+                ["email", "Email"],
               ].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setChannel(key!)}
                   aria-pressed={channel === key}
                   className={cn(
-                    "flex-1 rounded px-2 py-1.5 text-[11px] font-semibold",
+                    "min-h-8 basis-[calc(33.333%-0.25rem)] grow rounded px-1.5 py-1.5 text-[10px] font-semibold",
                     channel === key ? "bg-card shadow-sm" : "text-muted-foreground",
                   )}
                 >
@@ -228,7 +239,7 @@ export function SupportInbox() {
           </div>
           <div className="flex items-center gap-2 border-t px-4 py-3 text-[10px] text-muted-foreground">
             <MessageCircle className="size-3.5 text-success-strong" />
-            Email inquiries <span className="ml-auto rounded bg-muted px-1.5 py-0.5">Demo</span>
+            All channels <span className="ml-auto rounded bg-muted px-1.5 py-0.5">Demo</span>
           </div>
         </aside>
         <section
@@ -259,9 +270,9 @@ export function SupportInbox() {
                     <div className="mt-0.5 text-[10px]">
                       <Channel channel={selected.channel} />
                       <span className="ml-2 text-muted-foreground">
-                        {selected.channel === "email"
-                          ? "Shared company number"
-                          : "Staff replies appear in website chat"}
+                        {selected.channel === "website"
+                          ? "Staff replies appear in website chat"
+                          : "Replies simulated in this demo"}
                       </span>
                     </div>
                   </div>
@@ -575,8 +586,8 @@ function ConversationDetail({
         note
           ? "Private note saved."
           : c.channel === "website"
-            ? "Reply added to the customer’s website chat."
-            : "Demo reply saved. No real Email message sent.",
+            ? "Demo reply added to the customer’s website chat."
+            : `Demo ${c.channel} reply saved. No message was sent.`,
       );
     } else setNotice("Reply not saved. Check the conversation status and browser storage.");
   }

@@ -18,6 +18,8 @@ const DISMISS_KEY = "bd-demo-guide-dismissed";
  */
 export function DemoGuide() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const href = useRouterState({ select: (s) => s.location.href });
+  const section = new URL(href, "http://localhost").searchParams.get("section");
   const prospect = useProspect();
   const [collapsed, setCollapsed] = useState(false);
   const [booked, setBooked] = useState(false);
@@ -57,7 +59,7 @@ export function DemoGuide() {
     }
   };
 
-  const base = stepForPath(pathname);
+  const base = stepForPath(pathname, section ?? "Overview");
 
   // Once the deposit is paid, the booking step turns into the hand-off.
   const step: GuideStep | undefined =
@@ -78,7 +80,10 @@ export function DemoGuide() {
       <button
         type="button"
         onClick={() => setCollapsedPersisted(false)}
-        className="fixed bottom-20 left-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5"
+        className={cn(
+          "fixed bottom-20 left-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-full bg-bd-navy px-4 text-xs font-bold text-white shadow-lg lg:bottom-5",
+          step.side === "staff" && "lg:left-64",
+        )}
       >
         <Compass className="size-4" />
         Show me around
@@ -89,7 +94,10 @@ export function DemoGuide() {
   return (
     <aside
       aria-label="Demo guide"
-      className="fixed bottom-20 left-4 right-4 z-50 max-w-sm rounded-xl border border-bd-navy/10 bg-white p-4 shadow-2xl shadow-bd-navy/20 sm:right-auto lg:bottom-5"
+      className={cn(
+        "fixed bottom-20 left-4 right-4 z-50 max-w-sm rounded-xl border border-bd-navy/10 bg-white p-4 shadow-2xl shadow-bd-navy/20 sm:right-auto lg:bottom-5",
+        step.side === "staff" && "lg:left-64",
+      )}
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-bd-blue text-[11px] font-bold text-white">
@@ -105,30 +113,32 @@ export function DemoGuide() {
           {step.finish ? (
             <div className="mt-3 rounded-lg bg-bd-paper p-3">
               <p className="flex items-center gap-1.5 text-xs font-bold text-bd-blue">
-                <Check className="size-3.5" /> That's the demo
+                <Check className="size-3.5" /> Demo complete. Imagine this built around your
+                business.
               </p>
               <p className="mt-1 text-xs leading-relaxed text-bd-body">
-                Want to see what this looks like running on your own jobs, your prices and your
-                crew?
+                BookedToDone adapts to your existing operations, pricing, crew, and workflows.
               </p>
               <a
                 href={bookingHrefFor("Demo finished — show me this on my operation", prospect)}
-                className="mt-2.5 flex min-h-10 items-center justify-center gap-1.5 rounded-lg bg-bd-blue px-3 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
+                className="mt-2.5 flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-bd-blue px-3 text-sm font-bold text-white transition-colors hover:bg-bd-blue-ink"
               >
-                Show me this on my operation <ArrowRight className="size-3.5" />
+                See how this works for my business <ArrowRight className="size-3.5" />
               </a>
-              <button
-                type="button"
+              <Link
+                to="/staff"
+                search={{ section: "Overview" }}
                 onClick={() => setCollapsedPersisted(true)}
-                className="mt-1.5 w-full text-center text-xs font-semibold text-bd-body underline-offset-2 hover:underline"
+                className="mt-1.5 flex min-h-10 w-full items-center justify-center text-xs font-semibold text-bd-body underline-offset-2 hover:underline"
               >
-                I'll keep exploring on my own
-              </button>
+                Explore on my own
+              </Link>
             </div>
           ) : (
             step.next && (
               <Link
                 to={step.next.to}
+                search={step.next.section ? { section: step.next.section } : undefined}
                 className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-bd-blue px-3 text-xs font-bold text-white transition-colors hover:bg-bd-blue-ink"
               >
                 {step.next.label} <ArrowRight className="size-3.5" />
@@ -139,6 +149,7 @@ export function DemoGuide() {
           {step.back && (
             <Link
               to={step.back.to}
+              search={step.back.section ? { section: step.back.section } : undefined}
               className="mt-2 flex min-h-8 items-center gap-1.5 text-xs font-semibold text-bd-body transition-colors hover:text-bd-navy"
             >
               <ArrowLeft className="size-3.5" /> {step.back.label}

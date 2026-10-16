@@ -1,6 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Archive, Banknote, ChevronRight, Clock3, Plus, Truck, UsersRound, X } from "lucide-react";
+import {
+  Archive,
+  Banknote,
+  Bot,
+  CalendarClock,
+  ChevronRight,
+  CircleAlert,
+  Clock3,
+  Plus,
+  Send,
+  Sparkles,
+  Truck,
+  UsersRound,
+  X,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -211,14 +236,16 @@ function Metric({
   icon?: typeof Archive;
 }) {
   return (
-    <Card className="rounded-lg shadow-sm">
-      <CardContent className="p-5">
-        <span className="grid size-9 place-items-center rounded-md bg-accent text-primary">
+    <Card className="rounded-md shadow-none">
+      <CardContent className="flex items-start gap-3 p-4">
+        <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent text-primary">
           <Icon className="size-4" />
         </span>
-        <p className="mt-5 font-display text-2xl font-bold">{value}</p>
-        <p className="text-sm font-medium">{label}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{note}</p>
+        <div className="min-w-0">
+          <p className="font-display text-xl font-bold tabular-nums">{value}</p>
+          <p className="text-xs font-semibold">{label}</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">{note}</p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -226,15 +253,73 @@ function Metric({
 const active = (j: Job) => !["Completed", "Cancelled"].includes(j.status);
 function Overview({ data, open }: { data: DemoData; open: (id: string) => void }) {
   const scheduled = data.jobs.filter((j) => j.date === today() && active(j));
+  const attention = data.jobs.filter(
+    (j) =>
+      ["Requested", "Needs Quote", "Quoted"].includes(j.status) ||
+      (j.status === "Confirmed" && !j.crew),
+  );
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const weekStart = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
+  const weekJobs = data.jobs.filter((j) => j.date >= weekStart && j.status !== "Cancelled");
+  const weekRevenue = weekJobs.reduce((sum, j) => sum + jobValue(j), 0);
+  const chartData = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - 6 + index);
+    const key = date.toISOString().slice(0, 10);
+    const dayJobs = data.jobs.filter((j) => j.date === key && j.status !== "Cancelled");
+    return {
+      day: date.toLocaleDateString("en-US", { weekday: "short" }),
+      bookings: index === 6 ? dayJobs.length : [4, 6, 3, 7, 5, 8][index]!,
+      revenue:
+        index === 6
+          ? dayJobs.reduce((sum, j) => sum + jobValue(j), 0)
+          : [540, 820, 410, 960, 680, 1120][index]!,
+    };
+  });
+  const statusData = statuses.map((status) => ({
+    status,
+    jobs: data.jobs.filter((j) => j.status === status).length,
+  }));
+  const sourceData = sources.map((source) => ({
+    source,
+    bookings: data.jobs.filter((j) => j.source === source).length,
+  }));
+  const runAssistant = (raw: string) => {
+    const prompt = raw.trim();
+    if (!prompt) return;
+    const lower = prompt.toLowerCase();
+    const unpaid = data.jobs.filter((j) => j.payment === "Unpaid" && j.status !== "Cancelled");
+    const completed = data.jobs.filter((j) => j.status === "Completed");
+    const todayJobs = data.jobs.filter((j) => j.date === today() && j.status !== "Cancelled");
+    if (lower.includes("payment") || lower.includes("unpaid")) {
+      setAnswer(
+        `${unpaid.length} bookings have pending payment (${money(unpaid.reduce((sum, j) => sum + jobValue(j), 0))} estimated). Next: review the Payments tab and confirm final charges.`,
+      );
+    } else if (lower.includes("revenue") || lower.includes("week")) {
+      setAnswer(
+        `Estimated booking value this week is ${money(weekRevenue)} across ${weekJobs.length} non-cancelled jobs. Collected revenue is ${money(data.jobs.reduce((sum, j) => sum + collectedValue(j), 0))} in this demo.`,
+      );
+    } else if (lower.includes("attention") || lower.includes("need")) {
+      setAnswer(
+        `${attention.length} jobs need attention: ${
+          attention
+            .slice(0, 3)
+            .map((j) => `${j.id} (${j.status})`)
+            .join(", ") || "none right now"
+        }. Next: open an alert below to quote, confirm, or assign the booking.`,
+      );
+    } else {
+      setAnswer(
+        `Today: ${todayJobs.length} bookings, ${scheduled.length} active pickups, and ${attention.length} needing attention. ${completed.length} jobs are completed. Next: check the attention list and confirm crews for today's schedule.`,
+      );
+    }
+    setQuestion(prompt);
+  };
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Metric
-          icon={Truck}
-          label="Today's jobs"
-          value={scheduled.length}
-          note="Active pickup requests and assignments"
-        />
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <Metric icon={Truck} label="Today's jobs" value={scheduled.length} note="Active pickups" />
         <Metric
           icon={Clock3}
           label="Pending bookings"
@@ -242,12 +327,12 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
             data.jobs.filter((j) => ["Requested", "Needs Quote", "Quoted"].includes(j.status))
               .length
           }
-          note="Awaiting quote or confirmation"
+          note="Need a team action"
         />
         <Metric
           label="Completed jobs"
           value={data.jobs.filter((j) => j.status === "Completed").length}
-          note="All demo records"
+          note="All bookings"
         />
         <Metric
           icon={Banknote}
@@ -255,7 +340,7 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
           value={money(
             data.jobs.filter((j) => j.status !== "Cancelled").reduce((s, j) => s + jobValue(j), 0),
           )}
-          note="Non-cancelled quoted value · not collected revenue"
+          note="Estimated, not collected"
         />
         <Metric
           icon={UsersRound}
@@ -263,55 +348,277 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
           value={
             data.crews.filter((c) => c.available && !scheduled.some((j) => j.crew === c.id)).length
           }
-          note="No active job scheduled today"
-        />
-        <Metric
-          icon={Truck}
-          label="Available trucks"
-          value={
-            data.trucks.filter((t) => t.available && !scheduled.some((j) => j.truck === t.id))
-              .length
-          }
-          note="No active job scheduled today"
+          note="Free today"
         />
       </div>
-      <Panel title="Needs your attention">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {data.jobs
-            .filter(
-              (j) =>
-                ["Requested", "Needs Quote", "Quoted"].includes(j.status) ||
-                (j.status === "Confirmed" && !j.crew),
-            )
-            .map((j) => (
+      <StaffAssistant
+        data={data}
+        onAsk={runAssistant}
+        question={question}
+        answer={answer}
+        onQuestion={setQuestion}
+      />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Bookings · last 7 days">
+          <div className="h-56" role="img" aria-label="Bookings by day over the last seven days">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="bookings"
+                  name="Bookings"
+                  stroke="#176344"
+                  strokeWidth={2.5}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+        <Panel title="Estimated revenue · last 7 days">
+          <div
+            className="h-56"
+            role="img"
+            aria-label="Estimated booking revenue by day over the last seven days"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, bottom: 0, left: 4 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickFormatter={(value: number) => `$${value}`}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip formatter={(value) => money(Number(value))} />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  name="Estimated revenue"
+                  stroke="#2b8a61"
+                  strokeWidth={2.5}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Historical values are sample data; today reflects current bookings.
+          </p>
+        </Panel>
+        <Panel title="Jobs by status">
+          <div className="h-56" role="img" aria-label="Current bookings by job status">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={statusData} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="status"
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                  height={48}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Bar dataKey="jobs" name="Bookings" fill="#176344" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+        <Panel title="Lead sources">
+          <div className="h-56" role="img" aria-label="Current bookings by lead source">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={sourceData}
+                layout="vertical"
+                margin={{ top: 8, right: 16, bottom: 0, left: 12 }}
+              >
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" />
+                <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} />
+                <YAxis
+                  type="category"
+                  dataKey="source"
+                  tickLine={false}
+                  axisLine={false}
+                  width={62}
+                />
+                <Tooltip />
+                <Bar dataKey="bookings" name="Bookings" fill="#56a77f" radius={[0, 3, 3, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title={`Actionable alerts · ${attention.length}`}>
+          <div className="divide-y">
+            {attention.slice(0, 5).map((j) => (
               <button
-                className="flex items-center justify-between gap-3 rounded-lg border p-4 text-left text-sm hover:bg-accent"
                 key={j.id}
                 onClick={() => open(j.id)}
+                className="flex min-h-14 w-full items-center gap-3 py-3 text-left hover:text-primary"
               >
-                <span>
+                <CircleAlert className="size-4 shrink-0 text-warning-strong" />
+                <span className="min-w-0 flex-1 text-sm">
                   <strong>
-                    {j.name} · {j.id}
+                    {j.id} · {j.name}
                   </strong>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground">
                     {j.status === "Needs Quote"
-                      ? "Prepare a custom quote"
+                      ? "Prepare a quote"
                       : j.status === "Quoted"
-                        ? "Awaiting customer quote approval"
+                        ? "Awaiting quote approval"
                         : j.status === "Requested"
-                          ? "Review and confirm pickup"
-                          : "Assign a crew and truck"}
-                  </p>
+                          ? "Review and confirm"
+                          : "Assign crew and truck"}
+                  </span>
                 </span>
                 <ChevronRight className="size-4" />
               </button>
             ))}
-        </div>
-      </Panel>
+            {!attention.length && (
+              <p className="py-4 text-sm text-muted-foreground">
+                Nothing needs attention right now.
+              </p>
+            )}
+          </div>
+        </Panel>
+        <Panel title="Upcoming jobs & recent activity">
+          <div className="divide-y">
+            {[...data.jobs]
+              .filter((j) => active(j) && j.date >= today())
+              .sort((a, b) => a.date.localeCompare(b.date))
+              .slice(0, 4)
+              .map((j) => (
+                <button
+                  key={j.id}
+                  onClick={() => open(j.id)}
+                  className="flex min-h-14 w-full items-center gap-3 py-3 text-left hover:text-primary"
+                >
+                  <CalendarClock className="size-4 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1 text-sm">
+                    <strong>
+                      {dateLabel(j.date)} · {j.name}
+                    </strong>
+                    <span className="block text-xs text-muted-foreground">
+                      {j.window} ·{" "}
+                      {j.crew
+                        ? data.crews.find((crew) => crew.id === j.crew)?.name
+                        : "Crew not assigned"}
+                    </span>
+                  </span>
+                  <StatusBadge>{j.status}</StatusBadge>
+                </button>
+              ))}
+            {!data.jobs.some((j) => active(j) && j.date >= today()) && (
+              <p className="py-4 text-sm text-muted-foreground">No upcoming jobs scheduled.</p>
+            )}
+          </div>
+          <p className="mt-3 border-t pt-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Recent activity
+          </p>
+          {[...data.jobs]
+            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+            .slice(0, 2)
+            .map((j) => (
+              <button
+                key={`activity-${j.id}`}
+                onClick={() => open(j.id)}
+                className="flex w-full items-center justify-between gap-3 py-2 text-left text-xs"
+              >
+                <span className="truncate">
+                  {j.id} · {j.name} · {j.status}
+                </span>
+                <span className="shrink-0 text-muted-foreground">{j.source}</span>
+              </button>
+            ))}
+        </Panel>
+      </div>
       <Panel title="Today's operations">
         <BookingTable jobs={scheduled} open={open} />
       </Panel>
     </div>
+  );
+}
+function StaffAssistant({
+  data,
+  onAsk,
+  question,
+  answer,
+  onQuestion,
+}: {
+  data: DemoData;
+  onAsk: (prompt: string) => void;
+  question: string;
+  answer: string;
+  onQuestion: (value: string) => void;
+}) {
+  const suggestions = [
+    "Summarize today's bookings",
+    "Which jobs need attention?",
+    "How much revenue this week?",
+    "Show pending payments",
+  ];
+  return (
+    <Panel title="Ask AI">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <Bot className="size-4 text-primary" />
+        <span>Data-driven operations assistant</span>
+        <span className="rounded bg-warning-soft px-2 py-0.5 font-semibold text-warning-strong">
+          Demo
+        </span>
+      </div>
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onAsk(question);
+        }}
+      >
+        <input
+          aria-label="Ask a question about your bookings"
+          value={question}
+          onChange={(event) => onQuestion(event.target.value)}
+          placeholder="Ask about bookings, jobs, revenue, or payments…"
+          className="h-10 min-w-0 flex-1 rounded-md border bg-background px-3 text-sm"
+        />
+        <Button type="submit" aria-label="Ask AI">
+          <Send className="size-4" />
+          <span className="hidden sm:inline">Ask</span>
+        </Button>
+      </form>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {suggestions.map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => onAsk(prompt)}
+            className="min-h-8 rounded-md border px-2.5 text-xs hover:bg-accent"
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
+      {answer && (
+        <div
+          className="mt-3 rounded-md border border-primary/20 bg-accent/50 p-3 text-sm"
+          role="status"
+        >
+          <p className="flex items-center gap-2 font-semibold">
+            <Sparkles className="size-4 text-primary" />
+            {question}
+          </p>
+          <p className="mt-1 leading-relaxed">{answer}</p>
+        </div>
+      )}
+    </Panel>
   );
 }
 function BookingTable({ jobs, open }: { jobs: Job[]; open: (id: string) => void }) {

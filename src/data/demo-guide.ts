@@ -13,9 +13,10 @@ export type GuideStep = {
   title: string;
   body: string;
   /** Where "Next" goes, and what it says. Omit on the last step. */
-  next?: { to: string; label: string };
+  next?: { to: string; label: string; section?: string };
   /** Where "Back" goes, so a visitor can re-read a step they skipped past. */
-  back?: { to: string; label: string };
+  back?: { to: string; label: string; section?: string };
+  section?: string;
   /** The last step closes the demo out with a call to action. */
   finish?: boolean;
 };
@@ -47,29 +48,58 @@ export const guideSteps: GuideStep[] = [
   {
     match: "/staff/inbox",
     side: "staff",
-    title: "One inbox",
-    body: "Chat, phone, web and email land in a single thread per customer, with what the assistant already answered. That's the whole loop — one job, both sides, nothing typed twice.",
-    back: { to: "/staff", label: "Back to the dashboard" },
+    title: "Every channel. One inbox.",
+    body: "See Website, WhatsApp, SMS, and Facebook/Instagram conversations together. Replies are simulated; the Website example shows an AI-to-human handoff with context preserved.",
+    back: { to: "/staff", section: "Payments", label: "Back to payment tracking" },
     finish: true,
   },
   {
     match: "/staff",
     side: "staff",
+    section: "Overview",
     title: "Your office, already updated",
-    body: "The booking you just made is here — address, items and price filled in. Zero fields typed by staff.",
-    next: { to: "/staff/inbox", label: "See the inbox" },
+    body: "The customer booking appears here automatically with contact details, pickup address, detected items, and estimate. Ask AI for a live booking summary or business insight from this demo data.",
+    next: { to: "/staff", section: "Bookings", label: "Review and edit a booking" },
     back: { to: "/book", label: "Back to the booking" },
+  },
+  {
+    match: "/staff",
+    side: "staff",
+    section: "Bookings",
+    title: "Override details when plans change",
+    body: "Open the customer-submitted booking, choose Edit booking, then update customer details, items, schedule, crew, truck, or price. Save changes keeps the original estimate for comparison.",
+    next: { to: "/staff", section: "Payments", label: "Track job and payment" },
+    back: { to: "/staff", section: "Overview", label: "Back to the dashboard" },
+  },
+  {
+    match: "/staff",
+    side: "staff",
+    section: "Payments",
+    title: "Track jobs and payments",
+    body: "Follow each job from estimate through completion, review pending balances, and record a simulated payment. Changes remain in the shared demo booking data.",
+    next: { to: "/staff/inbox", label: "Open the centralized inbox" },
+    back: { to: "/staff", section: "Bookings", label: "Back to booking edits" },
   },
 ];
 
-export function stepForPath(pathname: string): GuideStep | undefined {
+export function stepForPath(pathname: string, section = "Overview"): GuideStep | undefined {
+  if (pathname === "/staff")
+    return guideSteps.find((step) => step.match === pathname && step.section === section);
   return [...guideSteps]
     .sort((a, b) => b.match.length - a.match.length)
     .find((s) => pathname === s.match || pathname.startsWith(`${s.match}/`));
 }
 
 export function stepNumber(step: GuideStep): { index: number; total: number } {
-  const ordered = ["/customer", "/book", "/staff", "/staff/inbox"];
-  const i = ordered.indexOf(step.match);
+  const ordered = [
+    "/customer",
+    "/book",
+    "/staff:Overview",
+    "/staff:Bookings",
+    "/staff:Payments",
+    "/staff/inbox",
+  ];
+  const key = step.match === "/staff" ? `${step.match}:${step.section}` : step.match;
+  const i = ordered.indexOf(key);
   return { index: i === -1 ? 1 : i + 1, total: ordered.length };
 }
