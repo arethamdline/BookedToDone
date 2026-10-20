@@ -287,10 +287,11 @@ function Overview({ data, open }: { data: DemoData; open: (id: string) => void }
                 ["Requested", "Needs Quote", "Quoted"].includes(j.status) ||
                 (j.status === "Confirmed" && !j.crew),
             )
-            .map((j) => (
+            .map((j, i) => (
               <button
                 className="flex items-center justify-between gap-3 rounded-lg border p-4 text-left text-sm hover:bg-accent"
                 key={j.id}
+                data-tour-point={i === 0 ? "" : undefined}
                 onClick={() => open(j.id)}
               >
                 <span>

@@ -87,6 +87,8 @@ export function DemoGuide() {
   const [collapsed, setCollapsed] = useState(false);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
+  /** Where the animated pointer taps, if this step has one thing to press. */
+  const [tap, setTap] = useState<{ x: number; y: number } | null>(null);
   /** The step's target is inside the open modal, so the page is already dimmed. */
   const [inDialog, setInDialog] = useState(false);
   /** A modal is open and this step's target is behind it — nothing to point at. */
@@ -193,6 +195,7 @@ export function DemoGuide() {
   const measure = useCallback(() => {
     if (!live) {
       setRect(null);
+      setTap(null);
       setBlocked(false);
       setInDialog(false);
       return;
@@ -211,6 +214,24 @@ export function DemoGuide() {
     setRect(
       r && r.width && r.height
         ? { top: r.top, left: r.left, width: r.width, height: r.height }
+        : null,
+    );
+
+    // The pointer taps one specific control: the lit element itself when it is
+    // a control, otherwise whatever inside it is marked `data-tour-point`. The
+    // middle of a container is often nothing pressable — on the assistant card
+    // the first button is "Send", not a suggestion. Steps you only read have
+    // neither, and get no pointer.
+    const point =
+      el && !behindDialog
+        ? el.matches(CONTROLS)
+          ? el
+          : el.querySelector("[data-tour-point]")
+        : null;
+    const pr = point?.getBoundingClientRect();
+    setTap(
+      pr && pr.width && pr.height
+        ? { x: pr.left + Math.min(pr.width / 2, 48), y: pr.top + pr.height / 2 }
         : null,
     );
   }, [live, current.target]);
@@ -427,7 +448,6 @@ export function DemoGuide() {
   // Keep the card off whatever it is pointing at, and put the pointer on the
   // side of the target that has room for it.
   const highlightLow = rect ? rect.top + rect.height / 2 > window.innerHeight / 2 : false;
-  const pointerAbove = rect ? rect.top + rect.height + 56 > window.innerHeight : false;
 
   const toStaff = current.side === "staff";
 
@@ -493,16 +513,7 @@ export function DemoGuide() {
               height: rect.height + 12,
             }}
           />
-          <span
-            aria-hidden="true"
-            className="bd-nudge pointer-events-none absolute flex items-center gap-1.5 rounded-full bg-bd-blue px-3 py-1.5 text-[11px] font-bold text-white shadow-xl"
-            style={{
-              top: pointerAbove ? rect.top - 44 : rect.top + rect.height + 12,
-              left: Math.max(12, Math.min(rect.left, window.innerWidth - 150)),
-            }}
-          >
-            <MousePointerClick className="size-3.5" /> Click here
-          </span>
+          {tap && <TapPointer x={tap.x} y={tap.y} />}
         </div>
       )}
 
@@ -669,6 +680,38 @@ function Side({ label, lit, delay }: { label: string; lit: boolean; delay: numbe
       style={lit ? { animationDelay: `${delay}s` } : undefined}
     >
       {label}
+    </span>
+  );
+}
+
+/**
+ * An animated cursor that taps the one thing to press: glides in, presses,
+ * ripples, lifts away, repeats. Drawn rather than an icon so the arrow's tip
+ * sits exactly on (0, 0) — positioning the element positions the tap.
+ */
+function TapPointer({ x, y }: { x: number; y: number }) {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute" style={{ left: x, top: y }}>
+      <span className="bd-cursor-ripple absolute left-0 top-0 size-14 rounded-full border-2 border-white bg-white/30" />
+      <span className="bd-cursor-tap absolute left-0 top-0 flex items-start">
+        <svg
+          width="32"
+          height="37"
+          viewBox="0 0 26 30"
+          className="shrink-0 drop-shadow-[0_2px_4px_rgba(16,44,35,0.45)]"
+        >
+          <path
+            d="M1 1 L1 23 L7.2 17.4 L11.4 27.2 L15.6 25.4 L11.5 15.8 L19.8 15.8 Z"
+            fill="white"
+            stroke="#102c23"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="-ml-1 mt-7 whitespace-nowrap rounded-full bg-bd-blue px-2 py-0.5 text-[11px] font-bold text-white shadow-lg">
+          Tap here
+        </span>
+      </span>
     </span>
   );
 }

@@ -138,6 +138,7 @@ export function DepositStep({ job, deposit }: { job: Job; deposit: number }) {
           type="button"
           size="lg"
           className="w-full"
+          data-tour-point=""
           disabled={phase === "processing"}
           onClick={pay}
         >

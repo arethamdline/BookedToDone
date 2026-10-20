@@ -198,10 +198,11 @@ export function CustomerAssistantCard() {
 
       <p className="mt-3 text-xs font-semibold text-muted-foreground">Or try one of these</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {starters.map((question) => (
+        {starters.map((question, i) => (
           <button
             key={question}
             type="button"
+            data-tour-point={i === 0 ? "" : undefined}
             onClick={() => ask(question)}
             className="min-h-9 rounded-full border bg-background px-3 text-xs font-medium transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >

@@ -288,19 +288,61 @@ textarea {
   animation: bd-pulse-ring 2.2s ease-out infinite;
 }
 
-/* The "click here" pointer on a guided-tour step. */
-@keyframes bd-nudge {
-  0%,
-  100% {
-    transform: translateY(0);
+/*
+ * The guided tour's pointer: glides in from below-right, taps, and lifts away,
+ * with a ripple where it pressed. The cursor's tip is the element's origin, so
+ * positioning it is just positioning that one point.
+ */
+@keyframes bd-cursor-tap {
+  0% {
+    transform: translate(34px, 30px);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  42% {
+    transform: translate(0, 0) scale(1);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translate(0, 0) scale(0.84);
+  }
+  60% {
+    transform: translate(0, 0) scale(1);
+  }
+  86% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 0;
   }
 }
 
-.bd-nudge {
-  animation: bd-nudge 1.4s ease-in-out infinite;
+.bd-cursor-tap {
+  transform-origin: 0 0;
+  animation: bd-cursor-tap 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes bd-cursor-ripple {
+  0%,
+  46% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+  52% {
+    opacity: 0.75;
+  }
+  90%,
+  100% {
+    transform: translate(-50%, -50%) scale(1.7);
+    opacity: 0;
+  }
+}
+
+.bd-cursor-ripple {
+  animation: bd-cursor-ripple 2.2s ease-out infinite;
 }
 
 /* Detection boxes landing on the sample photo, one after another. */
@@ -390,10 +432,15 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bd-cursor-tap {
+    animation: none !important;
+    opacity: 1;
+  }
+
   .bd-box-in,
+  .bd-cursor-ripple,
   .bd-dash,
   .bd-handover,
-  .bd-nudge,
   .bd-pop,
   .bd-pulse,
   .bd-rise,

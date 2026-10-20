@@ -85,6 +85,7 @@ export function PhotoEstimateStep({
             <button
               key={s.src}
               type="button"
+              data-tour-point={i === 0 ? "" : undefined}
               onClick={() => runScan(i)}
               className="group overflow-hidden rounded-xl border-2 border-transparent bg-card text-left shadow-sm transition-all hover:border-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
@@ -233,7 +234,7 @@ export function PhotoEstimateStep({
           </div>
 
           <div data-tour="scan-actions" className="flex flex-wrap gap-2">
-            <Button type="button" onClick={() => confirmWith(false)}>
+            <Button type="button" data-tour-point="" onClick={() => confirmWith(false)}>
               Looks right <Check className="size-4" />
             </Button>
             <Button type="button" variant="outline" onClick={() => confirmWith(true)}>
