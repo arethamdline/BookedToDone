@@ -1,6 +1,30 @@
 import { useEffect } from "react";
 
 /**
+ * Where the guided tour keeps its place. `sessionStorage`, so it belongs to one
+ * browser tab: two visitors on two devices can never see each other's progress,
+ * and a refresh mid-tour doesn't throw the visitor back to the start.
+ */
+export const TOUR_KEYS = {
+  step: "bd-demo-tour-step",
+  collapsed: "bd-demo-guide-dismissed",
+  finished: "bd-demo-tour-finished",
+} as const;
+
+/**
+ * Forget where the tour was. Called on the way in ("Start the guided demo") and
+ * on the way out ("Exit demo"), so going back in means starting again — rather
+ * than the same tab dropping you on whatever step you'd wandered off at.
+ */
+export function resetTour() {
+  try {
+    Object.values(TOUR_KEYS).forEach((key) => sessionStorage.removeItem(key));
+  } catch {
+    /* blocked storage — the tour couldn't have saved a place either */
+  }
+}
+
+/**
  * Fired by the guided tour whenever it moves to a different step.
  *
  * Anything that opens over the page — the customer's chat, the office

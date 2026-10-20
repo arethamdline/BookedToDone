@@ -14,7 +14,7 @@ import {
 import { nearestStepForRoute, tour, tourLength } from "@/data/demo-tour";
 import { bookingHrefFor, contactEmail } from "@/data/site-content";
 import { useProspect } from "@/lib/prospect";
-import { announceTourStep } from "@/lib/tour-events";
+import { announceTourStep, TOUR_KEYS } from "@/lib/tour-events";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,9 +22,9 @@ import { cn } from "@/lib/utils";
  * is meant to start the tour at step one. Carrying step 7 over from a visit
  * last week drops a stranger into the middle of a story they haven't been told.
  */
-const COLLAPSED_KEY = "bd-demo-guide-dismissed";
-const STEP_KEY = "bd-demo-tour-step";
-const FINISHED_KEY = "bd-demo-tour-finished";
+const COLLAPSED_KEY = TOUR_KEYS.collapsed;
+const STEP_KEY = TOUR_KEYS.step;
+const FINISHED_KEY = TOUR_KEYS.finished;
 
 /** Height the guide occupies, so the AI launcher can sit clear of it. */
 const GUIDE_VAR = "--bd-guide-h";

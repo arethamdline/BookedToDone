@@ -5,6 +5,7 @@ import { ArrowRight, Check, MousePointerClick, Play, RotateCcw } from "lucide-re
 import { DemoVideo } from "@/components/site/demo-video";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
 import { resetDemo } from "@/lib/reset-demo";
+import { resetTour } from "@/lib/tour-events";
 
 export const Route = createFileRoute("/demo")({
   validateSearch: validateProspectSearch,
@@ -95,6 +96,7 @@ function DemoChooser() {
               <Link
                 to="/customer"
                 search={search}
+                onClick={resetTour}
                 className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-bd-blue px-5 text-[15px] font-bold text-white transition-colors hover:bg-bd-blue-ink"
               >
                 Start the guided demo <ArrowRight className="size-4" />

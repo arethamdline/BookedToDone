@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { X } from "lucide-react";
 
 import { DemoGuide } from "./demo-guide";
+import { resetTour } from "@/lib/tour-events";
 
 /** Routes that are the company site, not the demo app. */
 const SITE_ROUTES = ["/", "/features"];
@@ -81,6 +82,7 @@ export function DemoTopBar() {
 
           <Link
             to="/"
+            onClick={resetTour}
             className={`flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold text-white/80 transition-colors hover:bg-white/10 hover:text-white sm:text-xs ${
               onChooser ? "ml-auto" : "ml-1"
             }`}
