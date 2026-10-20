@@ -1,10 +1,19 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Link } from "@tanstack/react-router";
 import { Bot, MessageCircle, Send, X } from "lucide-react";
 import { answerCompanyQuestion, company } from "@/data/company";
 import { readData } from "@/lib/junk-store";
 import { cn } from "@/lib/utils";
 import { recordCustomerAssistantMessage, useSupport } from "@/lib/support-store";
+import { useCloseOnTourStep } from "@/lib/tour-events";
 
 type ChatMessage = { id: string; role: "customer" | "assistant"; text: string };
 type CustomerAssistantContextValue = {
@@ -37,6 +46,9 @@ export function CustomerAssistantProvider({ children }: { children: ReactNode })
   const [open, setOpen] = useState(false);
   const [proactive, setProactive] = useState(false);
   const { conversations, ready } = useSupport();
+  // The chat is the thing the tour asks visitors to open on the assistant
+  // step; it shouldn't still be covering the page when the tour moves on.
+  useCloseOnTourStep(useCallback(() => setOpen(false), []));
   const conversation = conversations.find((item) => item.threadId === threadId);
 
   useEffect(() => {

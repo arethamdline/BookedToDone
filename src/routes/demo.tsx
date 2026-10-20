@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, MousePointerClick, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Check, MousePointerClick, Play, RotateCcw } from "lucide-react";
 
 import { DemoVideo } from "@/components/site/demo-video";
 import { prospectSearch, useProspect, validateProspectSearch } from "@/lib/prospect";
+import { resetDemo } from "@/lib/reset-demo";
 
 export const Route = createFileRoute("/demo")({
   validateSearch: validateProspectSearch,
@@ -111,7 +113,81 @@ function DemoChooser() {
           </Link>
           .
         </p>
+
+        <ClearDemo />
       </div>
     </main>
+  );
+}
+
+/**
+ * For whoever is about to hand their laptop to a client. The demo remembers
+ * everything typed into it on this browser — test chats included — and shows
+ * it again next time. Two presses, so it can't be wiped by a stray tap.
+ */
+const CLEARED_KEY = "bd-demo-cleared";
+
+function ClearDemo() {
+  const [armed, setArmed] = useState(false);
+  const [done, setDone] = useState(false);
+
+  // Coming back from the reload that follows a clear: say it worked.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(CLEARED_KEY) === "1") {
+        sessionStorage.removeItem(CLEARED_KEY);
+        setDone(true);
+      }
+    } catch {
+      /* no storage — the clear had nothing to clear either */
+    }
+  }, []);
+
+  // An armed button that's ignored disarms itself rather than waiting forever.
+  useEffect(() => {
+    if (!armed) return;
+    const id = window.setTimeout(() => setArmed(false), 6000);
+    return () => clearTimeout(id);
+  }, [armed]);
+
+  const clear = () => {
+    if (!armed) {
+      setArmed(true);
+      return;
+    }
+    resetDemo();
+    // The demo's stores still hold the old chats and bookings in memory, and
+    // would write them straight back. Reloading makes every one of them start
+    // again from empty storage — the sample company as it ships.
+    try {
+      sessionStorage.setItem(CLEARED_KEY, "1");
+    } catch {
+      /* the reload still clears; there's just no message after it */
+    }
+    window.location.reload();
+  };
+
+  return (
+    <div className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-bd-navy/10 pt-5 text-xs text-bd-body">
+      <span>Showing this to someone? Clear out anything typed into the demo on this browser.</span>
+      {done ? (
+        <span className="inline-flex items-center gap-1.5 font-semibold text-bd-green">
+          <Check className="size-3.5" /> Cleared — the demo starts fresh
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={clear}
+          className={
+            armed
+              ? "inline-flex min-h-8 items-center gap-1.5 rounded-md bg-warning-soft px-2.5 font-bold text-warning-strong"
+              : "inline-flex min-h-8 items-center gap-1.5 rounded-md px-2.5 font-semibold text-bd-blue hover:bg-bd-blue-soft"
+          }
+        >
+          <RotateCcw className="size-3.5" />
+          {armed ? "Press again to clear everything" : "Clear demo data"}
+        </button>
+      )}
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { nearestStepForRoute, tour, tourLength } from "@/data/demo-tour";
 import { bookingHrefFor, contactEmail } from "@/data/site-content";
 import { useProspect } from "@/lib/prospect";
+import { announceTourStep } from "@/lib/tour-events";
 import { cn } from "@/lib/utils";
 
 /**
@@ -122,6 +123,28 @@ export function DemoGuide() {
     },
     [pathname, router],
   );
+
+  /**
+   * Every step starts clean. Whatever the visitor opened on the last one — the
+   * customer's chat, the office assistant, a booking — closes as the tour moves
+   * on, rather than being left over the thing the new step is pointing at. Not
+   * on the first render, which is just the saved position coming back.
+   */
+  const lastStep = useRef<number | null>(null);
+  useEffect(() => {
+    if (!ready) return;
+    if (lastStep.current === null) {
+      lastStep.current = step;
+      return;
+    }
+    if (lastStep.current === step) return;
+    lastStep.current = step;
+    announceTourStep();
+    // Except a dialog the new step is about: opening the booking on the
+    // dashboard step is what *brings* you to the step inside that booking, and
+    // closing it on arrival would shut it the moment it opened.
+    if (!tour[step]?.closesDialog) closeDialog();
+  }, [ready, step]);
 
   const current = tour[step]!;
   const onThisRoute = current.route === pathname;

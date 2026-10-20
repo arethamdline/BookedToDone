@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Send, Sparkles, X } from "lucide-react";
 
 import { Button } from "./ui/button";
 import { money, today, type DemoData, type Job } from "@/data/mock-data";
 import { useJunk } from "@/lib/junk-store";
+import { useCloseOnTourStep } from "@/lib/tour-events";
 
 /**
  * The office-side assistant.
@@ -80,6 +81,7 @@ function answer(question: string, data: DemoData): string {
 export function StaffAssistant() {
   const { data } = useJunk();
   const [open, setOpen] = useState(false);
+  useCloseOnTourStep(useCallback(() => setOpen(false), []));
   const [draft, setDraft] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
