@@ -103,6 +103,7 @@ export function StaffAssistant() {
         type="button"
         onClick={() => setOpen(true)}
         data-tour="office-assistant"
+        data-tour-hide="office-assistant"
         className="bd-ai-gradient fixed bottom-5 right-5 z-[66] flex min-h-12 items-center gap-2 rounded-full px-4 text-sm font-bold text-white shadow-xl transition-transform hover:scale-105"
       >
         <Bot className="size-5" /> Office assistant
@@ -112,6 +113,7 @@ export function StaffAssistant() {
   return (
     <aside
       aria-label="Office assistant"
+      data-tour-panel=""
       className="fixed bottom-5 right-5 z-[66] flex h-[28rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
     >
       <header className="bd-ai-gradient flex items-center gap-2 px-4 py-2.5 text-white">

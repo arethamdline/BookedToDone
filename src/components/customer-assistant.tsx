@@ -240,6 +240,7 @@ function CustomerAssistantWidget({
       {open && (
         <section
           aria-label="Customer AI chat"
+          data-tour-panel=""
           className="fixed bottom-24 right-3 z-[70] flex max-h-[min(72dvh,36rem)] flex-col overflow-hidden rounded-lg border bg-background shadow-2xl lg:right-6"
           style={{ width: "min(24rem, calc(100vw - 1.5rem))" }}
         >
@@ -316,6 +317,7 @@ function CustomerAssistantWidget({
         <div
           role="status"
           aria-live="polite"
+          data-tour-hide=""
           className="fixed bottom-36 right-3 z-[70] flex max-w-[calc(100vw-1.5rem)] items-start gap-2 rounded-lg border bg-background p-3 text-sm shadow-xl lg:bottom-24 lg:right-6"
         >
           <p>It's 9:14 pm. We still answer. Ask anything.</p>
@@ -427,6 +429,7 @@ function AssistantLauncher({
         type="button"
         onClick={closeChat}
         aria-label="Close AI chat"
+        data-tour-hide-phone=""
         className="bd-ai-gradient fixed bottom-20 right-3 z-[70] grid size-14 place-items-center rounded-full text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
       >
         <X className="size-6" />

@@ -16,10 +16,10 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
   return (
     <CustomerAssistantProvider>
       <div className="min-h-screen bg-background text-foreground">
-        <header className="sticky top-14 z-40 border-b bg-background/95 backdrop-blur">
+        <header className="z-40 border-b bg-background/95 backdrop-blur sm:sticky sm:top-14">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 lg:px-8">
             <Link to="/customer" aria-label="Sample company home" className="min-w-0">
-              <SampleCompanyBrand className="[&>span:last-child]:hidden sm:[&>span:last-child]:inline" />
+              <SampleCompanyBrand />
             </Link>
             <nav className="hidden items-center gap-1 lg:flex">
               {items.map((i) => (
@@ -38,7 +38,10 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main className="pb-24 lg:pb-0">{children}</main>
-        <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-3 border-t bg-background px-2 pb-[max(env(safe-area-inset-bottom),0.375rem)] pt-1.5 lg:hidden">
+        <nav
+          data-tour-hide-phone
+          className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-3 border-t bg-background px-2 pb-[max(env(safe-area-inset-bottom),0.375rem)] pt-1.5 lg:hidden"
+        >
           {items.map((i) => {
             const active = pathname === i.to || pathname.startsWith(`${i.to}/`);
             return (

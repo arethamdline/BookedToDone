@@ -579,7 +579,50 @@ textarea {
   }
 }
 
-/* The guided tour owns the screen while it is open. */
-:root[data-guide="open"] .bd-launcher {
+/*
+ * The guided tour owns the screen while it is open. Floating launchers and
+ * bubbles step aside — on a phone they landed on whatever the tour was pointing
+ * at — except the office assistant on the one step that introduces it.
+ */
+:root[data-guide="open"] .bd-launcher,
+:root[data-guide="open"] [data-tour-hide] {
   display: none;
+}
+
+:root[data-guide="open"][data-guide-step="assistant-staff"] [data-tour-hide="office-assistant"] {
+  display: flex;
+}
+
+/*
+ * On a phone the guide is a sheet along the bottom edge. It takes the bottom
+ * nav's place (the tour is doing the navigating), and the page gets room at the
+ * bottom equal to the sheet, so nothing is stuck underneath it.
+ */
+@media (max-width: 639px) {
+  :root[data-guide="open"] [data-tour-hide-phone] {
+    display: none;
+  }
+
+  :root[data-guide="open"] body {
+    padding-bottom: var(--bd-guide-h, 0px);
+  }
+
+  /*
+   * Anything pinned to the bottom corner — the chat, the office assistant and
+   * its panel — sits on top of the sheet instead of underneath it. The
+   * assistant button is the target of a tour step, and was unreachable there.
+   */
+  :root[data-guide="open"] [data-tour-panel],
+  :root[data-guide="open"] [data-tour="office-assistant"] {
+    bottom: calc(var(--bd-guide-h, 0px) + 0.75rem);
+  }
+
+  /*
+   * While a chat is open the sheet drops to its title and its one button, so
+   * the conversation gets the screen — including the box you type into, which
+   * the full sheet used to cover.
+   */
+  :root[data-guide="open"]:has([data-tour-panel]) [data-guide-detail] {
+    display: none;
+  }
 }

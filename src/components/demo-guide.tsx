@@ -29,6 +29,24 @@ const FINISHED_KEY = TOUR_KEYS.finished;
 /** Height the guide occupies, so the AI launcher can sit clear of it. */
 const GUIDE_VAR = "--bd-guide-h";
 
+/** Below `sm`. Where the guide becomes a bottom sheet. */
+const PHONE_QUERY = "(max-width: 639px)";
+
+/** The demo bar is the only thing pinned to the top of a phone screen. */
+const PHONE_TOP_CHROME = 56;
+
+/**
+ * Bring the step into view: the one control it wants pressed if there is one,
+ * otherwise the lit element. On a tall target (the whole assistant card) the
+ * control is what has to be visible, not the card's middle.
+ */
+function bringIntoView(selector: string) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  const point = el.matches(CONTROLS) ? el : el.querySelector("[data-tour-point]");
+  (point ?? el).scrollIntoView({ block: "center", behavior: "smooth" });
+}
+
 /** What counts as "the visitor pressed the thing" inside a highlighted area. */
 const CONTROLS = 'button, a[href], input, select, textarea, [role="button"], [role="link"]';
 
@@ -94,6 +112,21 @@ export function DemoGuide() {
   /** A modal is open and this step's target is behind it — nothing to point at. */
   const [blocked, setBlocked] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
+
+  /**
+   * On a phone the guide is a sheet docked to the bottom edge rather than a
+   * floating card. A 250px card can't share a 375x812 screen with the thing
+   * it's pointing at — it used to sit right on top of it, covering the very
+   * suggestions step 2 asks you to tap.
+   */
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(PHONE_QUERY);
+    const sync = () => setIsPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   /** True while a navigation the tour itself asked for is still in flight. */
   const navigating = useRef(false);
   /** Saved position restored. Until then there is nothing to follow. */
@@ -269,11 +302,7 @@ export function DemoGuide() {
 
   useEffect(() => {
     if (!live || blocked) return;
-    const id = window.setTimeout(() => {
-      document
-        .querySelector(current.target!)
-        ?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 200);
+    const id = window.setTimeout(() => bringIntoView(current.target!), 200);
     return () => clearTimeout(id);
   }, [live, blocked, current.target, step]);
 
@@ -318,27 +347,53 @@ export function DemoGuide() {
       if (el.closest("[data-tour-allow], aside[aria-label='Demo guide']")) return;
       e.preventDefault();
       e.stopPropagation();
-      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      bringIntoView(current.target!);
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
   }, [live, rect, inDialog, current.target]);
 
-  // publish our height so the assistant launcher can clear it
+  // Publish our height, whether we're open, and which step we're on, so the
+  // rest of the page can make room — see the `data-guide` rules in styles.css.
+  const [cardHeight, setCardHeight] = useState(0);
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    // The sheet changes size from CSS alone — it slims down while a chat is
+    // open — which no React dependency would notice. Watch the box itself.
+    const ro = new ResizeObserver(() => setCardHeight(card.offsetHeight));
+    ro.observe(card);
+    setCardHeight(card.offsetHeight);
+    return () => ro.disconnect();
+    // Re-attach only when the sheet itself comes and goes: it isn't rendered
+    // while collapsed, once finished, or off the tour's routes.
+  }, [collapsed, finished, pathname]);
+
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty(
-      GUIDE_VAR,
-      collapsed ? "0px" : `${cardRef.current?.offsetHeight ?? 0}px`,
-    );
+    const height = collapsed ? 0 : cardHeight;
+    root.style.setProperty(GUIDE_VAR, `${height}px`);
     // While the tour is driving, the floating assistant is competing noise —
     // and on a phone it lands on whatever the guide is pointing at.
     root.dataset["guide"] = collapsed ? "closed" : "open";
+    root.dataset["guideStep"] = current.id;
+    // On a phone, scrolling something "into view" has to mean into the band
+    // between the demo bar and the sheet, or it lands behind the sheet.
+    if (isPhone && !collapsed) {
+      root.style.scrollPaddingTop = `${PHONE_TOP_CHROME + 8}px`;
+      root.style.scrollPaddingBottom = `${height + 12}px`;
+    } else {
+      root.style.scrollPaddingTop = "";
+      root.style.scrollPaddingBottom = "";
+    }
     return () => {
       root.style.removeProperty(GUIDE_VAR);
+      root.style.scrollPaddingTop = "";
+      root.style.scrollPaddingBottom = "";
       delete root.dataset["guide"];
+      delete root.dataset["guideStep"];
     };
-  }, [collapsed, step, pathname, rect]);
+  }, [collapsed, step, pathname, rect, isPhone, current.id, cardHeight]);
 
   const setCollapsedPersisted = (value: boolean) => {
     setCollapsed(value);
@@ -524,16 +579,22 @@ export function DemoGuide() {
           // `pointer-events-auto` is load-bearing: an open Radix dialog kills
           // pointer events on everything outside itself, which left the tour
           // card visible but dead exactly when a visitor most needed it.
-          "pointer-events-auto fixed left-4 right-4 z-[80] max-w-sm overflow-hidden rounded-xl border border-bd-navy/10 bg-white shadow-2xl shadow-bd-navy/30 sm:right-auto",
-          pathname.startsWith("/staff") && "lg:left-[16.5rem]",
-          highlightLow ? "top-20" : "bottom-20 lg:bottom-5",
+          "pointer-events-auto fixed z-[80] overflow-hidden bg-white shadow-2xl shadow-bd-navy/30",
+          isPhone
+            ? // A sheet: full width, flush to the bottom, page scrolls above it.
+              "inset-x-0 bottom-0 rounded-t-2xl border-t border-bd-navy/10 pb-[env(safe-area-inset-bottom)]"
+            : cn(
+                "left-4 right-4 max-w-sm rounded-xl border border-bd-navy/10 sm:right-auto",
+                pathname.startsWith("/staff") && "lg:left-[16.5rem]",
+                highlightLow ? "top-20" : "bottom-20 lg:bottom-5",
+              ),
         )}
       >
         {/* A tour needs to announce itself as one, and show how far along it is.
             Navy, not the AI gradient: the gradient is reserved for moments where
             the AI is actually doing something, and the progress line lives
             inside this bar so it reads as one piece rather than a stray rule. */}
-        <div className="relative bg-bd-navy px-4 pb-2.5 pt-2 text-white">
+        <div className="relative bg-bd-navy px-4 pb-2 pt-1.5 text-white sm:pb-2.5 sm:pt-2">
           <div className="flex items-center gap-2">
             <Compass className="size-3.5 shrink-0 text-white/80" />
             <p className="text-[10px] font-bold uppercase tracking-[0.12em]">Guided demo</p>
@@ -557,12 +618,14 @@ export function DemoGuide() {
           </div>
         </div>
 
-        <div className="p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-bd-mute">
+        <div className="px-4 pb-2 pt-3 sm:p-4">
+          <p className="hidden text-[10px] font-bold uppercase tracking-wide text-bd-mute sm:block">
             {current.side === "customer" ? "Customer side" : "Your office"}
           </p>
           <p className="mt-0.5 font-display text-base font-bold text-bd-navy">{current.title}</p>
-          <p className="mt-1.5 text-xs leading-relaxed text-bd-body">{current.body}</p>
+          <p data-guide-detail className="mt-1.5 text-xs leading-relaxed text-bd-body">
+            {current.body}
+          </p>
 
           {current.finish ? (
             /* The last step still describes the screen it's on. Finishing is a
@@ -609,7 +672,12 @@ export function DemoGuide() {
                 </p>
               )}
               {rect && current.action && current.prompt && (
-                <p className="mt-2.5 flex items-start gap-1.5 text-[11px] font-semibold leading-snug text-bd-mute">
+                <p
+                  data-guide-detail
+                  // On a phone the animated "Tap here" pointer on the page already
+                  // says this, and the sheet can't spare the line.
+                  className="mt-2.5 hidden items-start gap-1.5 text-[11px] font-semibold leading-snug text-bd-mute sm:flex"
+                >
                   <MousePointerClick className="mt-px size-3.5 shrink-0" />
                   {current.prompt} — then:
                 </p>
@@ -629,8 +697,13 @@ export function DemoGuide() {
             </>
           )}
 
-          {!current.finish && (
-            <div className="mt-3 flex items-center gap-3 border-t border-bd-line pt-2.5">
+          {/* Only when there's something in it — on step one there's no Back
+              and nothing to skip, and an empty ruled-off row is just a line. */}
+          {!current.finish && (step > 0 || ((rect || blocked) && !current.action)) && (
+            <div
+              data-guide-detail
+              className="mt-2 flex items-center gap-3 border-t border-bd-line pt-1.5 sm:mt-3 sm:pt-2.5"
+            >
               {step > 0 && (
                 <button
                   type="button"
