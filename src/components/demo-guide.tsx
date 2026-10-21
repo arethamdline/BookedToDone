@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -35,17 +36,66 @@ const PHONE_QUERY = "(max-width: 639px)";
 /** The demo bar is the only thing pinned to the top of a phone screen. */
 const PHONE_TOP_CHROME = 56;
 
+/** Inside something pinned to the screen: a dialog, a floating button or panel. */
+function isPinned(el: Element) {
+  for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) {
+    if (getComputedStyle(n).position === "fixed") return true;
+  }
+  return false;
+}
+
+/** How far down the screen the pinned headers reach once they've stuck. */
+function topChrome() {
+  let bottom = 0;
+  for (const h of document.querySelectorAll("header")) {
+    const cs = getComputedStyle(h);
+    const r = h.getBoundingClientRect();
+    if (cs.position === "sticky") bottom = Math.max(bottom, (parseFloat(cs.top) || 0) + r.height);
+    else if (cs.position === "fixed" && r.top <= 1) bottom = Math.max(bottom, r.bottom);
+  }
+  return bottom;
+}
+
 /**
  * Bring the step into view: the one control it wants pressed if there is one,
- * otherwise the lit element. On a tall target (the whole assistant card) the
- * control is what has to be visible, not the card's middle.
+ * otherwise the lit element — on a tall target the control is what has to be
+ * visible. It lands in the clear band between the pinned headers and whatever
+ * covers the bottom (the sheet, on a phone). Returns false while the target
+ * doesn't exist yet, so the caller knows to try again.
+ *
+ * Scrolled by hand rather than with scrollIntoView, which ignores the sheet
+ * unless the browser honours scroll-padding for it — iPhone Safari didn't, and
+ * centred the photos straight behind the sheet.
  */
-function bringIntoView(selector: string) {
+function bringIntoView(selector: string, coveredBottom: number): boolean {
   const el = document.querySelector(selector);
-  if (!el) return;
-  const point = el.matches(CONTROLS) ? el : el.querySelector("[data-tour-point]");
-  (point ?? el).scrollIntoView({ block: "center", behavior: "smooth" });
+  if (!el) return false;
+  const node = el.matches(CONTROLS) ? el : (el.querySelector("[data-tour-point]") ?? el);
+  if (isPinned(node)) {
+    // Inside a dialog or panel: its own scroller, which the browser handles.
+    node.scrollIntoView({ block: "center", behavior: "smooth" });
+    return true;
+  }
+  const r = node.getBoundingClientRect();
+  const top = topChrome();
+  const bottom = window.innerHeight - coveredBottom;
+  if (r.top >= top + 8 && r.bottom <= bottom - 8) return true; // already in view
+  const centre = top + (bottom - top) / 2;
+  window.scrollTo({
+    top: Math.max(0, window.scrollY + r.top + r.height / 2 - centre),
+    behavior: "smooth",
+  });
+  return true;
 }
+
+const sameBox = (a: Rect | null, b: Rect | null) =>
+  a === b ||
+  (!!a &&
+    !!b &&
+    Math.abs(a.top - b.top) < 0.5 &&
+    Math.abs(a.left - b.left) < 0.5 &&
+    Math.abs(a.width - b.width) < 0.5 &&
+    Math.abs(a.height - b.height) < 0.5);
 
 /** What counts as "the visitor pressed the thing" inside a highlighted area. */
 const CONTROLS = 'button, a[href], input, select, textarea, [role="button"], [role="link"]';
@@ -104,7 +154,17 @@ export function DemoGuide() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [step, setStep] = useState(0);
+  /**
+   * Where the lit element is. In page coordinates when it scrolls with the
+   * page, so the highlight is laid out once and then moves with the content
+   * natively — repositioning it from scroll events made it trail behind on
+   * iPhone, where those arrive late during momentum scrolling. In screen
+   * coordinates when the element is itself pinned (a dialog, the assistant).
+   */
   const [rect, setRect] = useState<Rect | null>(null);
+  const [pinned, setPinned] = useState(false);
+  /** The lit element sits in the lower half of the screen. */
+  const [low, setLow] = useState(false);
   /** Where the animated pointer taps, if this step has one thing to press. */
   const [tap, setTap] = useState<{ x: number; y: number } | null>(null);
   /** The step's target is inside the open modal, so the page is already dimmed. */
@@ -244,11 +304,18 @@ export function DemoGuide() {
     setInDialog(!!dialog && !!el && dialog.contains(el));
 
     const r = el && !behindDialog ? el.getBoundingClientRect() : null;
-    setRect(
+    const isFixed = !!el && isPinned(el);
+    const ox = isFixed ? 0 : window.scrollX;
+    const oy = isFixed ? 0 : window.scrollY;
+    setPinned(isFixed);
+    const box =
       r && r.width && r.height
-        ? { top: r.top, left: r.left, width: r.width, height: r.height }
-        : null,
-    );
+        ? { top: r.top + oy, left: r.left + ox, width: r.width, height: r.height }
+        : null;
+    // Unchanged boxes keep their identity, so a scroll — which leaves page
+    // coordinates exactly where they were — doesn't re-render anything.
+    setRect((prev) => (sameBox(prev, box) ? prev : box));
+    setLow(r ? r.top + r.height / 2 > window.innerHeight / 2 : false);
 
     // The pointer taps one specific control: the lit element itself when it is
     // a control, otherwise whatever inside it is marked `data-tour-point`. The
@@ -262,10 +329,14 @@ export function DemoGuide() {
           : el.querySelector("[data-tour-point]")
         : null;
     const pr = point?.getBoundingClientRect();
-    setTap(
+    const next =
       pr && pr.width && pr.height
-        ? { x: pr.left + Math.min(pr.width / 2, 48), y: pr.top + pr.height / 2 }
-        : null,
+        ? { x: pr.left + ox + Math.min(pr.width / 2, 48), y: pr.top + oy + pr.height / 2 }
+        : null;
+    setTap((prev) =>
+      prev && next && Math.abs(prev.x - next.x) < 0.5 && Math.abs(prev.y - next.y) < 0.5
+        ? prev
+        : next,
     );
   }, [live, current.target]);
 
@@ -293,18 +364,29 @@ export function DemoGuide() {
   useEffect(() => {
     if (!live) return;
     window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, { passive: true });
+    // Capture, so scrolling inside a dialog is seen as well as the page's.
+    document.addEventListener("scroll", measure, { passive: true, capture: true });
     return () => {
       window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure);
+      document.removeEventListener("scroll", measure, { capture: true });
     };
   }, [measure, live]);
 
+  /**
+   * Scroll the step into view — and keep trying for a couple of seconds. On a
+   * phone the next page's code is still arriving when the step starts, so a
+   * single attempt found nothing to scroll to and the visitor was left looking
+   * at the top of the page with everything dimmed. Each attempt is a no-op
+   * once the target is in view, so they don't fight a settled screen.
+   */
   useEffect(() => {
     if (!live || blocked) return;
-    const id = window.setTimeout(() => bringIntoView(current.target!), 200);
-    return () => clearTimeout(id);
-  }, [live, blocked, current.target, step]);
+    const covered = () => (isPhone ? (cardRef.current?.offsetHeight ?? 0) : 0);
+    const ids = [150, 500, 1100, 2000, 3200].map((d) =>
+      window.setTimeout(() => bringIntoView(current.target!, covered()), d),
+    );
+    return () => ids.forEach(clearTimeout);
+  }, [live, blocked, current.target, step, isPhone]);
 
   /**
    * Pressing the highlighted thing is what moves the tour on. Capture phase so
@@ -347,11 +429,11 @@ export function DemoGuide() {
       if (el.closest("[data-tour-allow], aside[aria-label='Demo guide']")) return;
       e.preventDefault();
       e.stopPropagation();
-      bringIntoView(current.target!);
+      bringIntoView(current.target!, isPhone ? (cardRef.current?.offsetHeight ?? 0) : 0);
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [live, rect, inDialog, current.target]);
+  }, [live, rect, inDialog, current.target, isPhone]);
 
   // Publish our height, whether we're open, and which step we're on, so the
   // rest of the page can make room — see the `data-guide` rules in styles.css.
@@ -502,7 +584,7 @@ export function DemoGuide() {
 
   // Keep the card off whatever it is pointing at, and put the pointer on the
   // side of the target that has room for it.
-  const highlightLow = rect ? rect.top + rect.height / 2 > window.innerHeight / 2 : false;
+  const highlightLow = !!rect && low;
 
   const toStaff = current.side === "staff";
 
@@ -538,39 +620,49 @@ export function DemoGuide() {
         </div>
       )}
 
-      {rect && (
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
-          {/* A spread shadow big enough to cover the viewport dims everything
+      {rect &&
+        createPortal(
+          // Portalled to <body> so `absolute` means "on the page": the layer
+          // starts at the document's origin and scrolls with everything else.
+          <div
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none z-[70]",
+              pinned ? "fixed inset-0" : "absolute left-0 top-0",
+            )}
+          >
+            {/* A spread shadow big enough to cover the viewport dims everything
               except the hole punched by this element. Skipped inside a modal,
               which already dims the page behind itself. The ring is a separate
               element because `bd-pulse` animates box-shadow and would otherwise
               wipe out the dimming. */}
-          {!inDialog && (
+            {!inDialog && (
+              <span
+                aria-hidden="true"
+                className="absolute rounded-xl"
+                style={{
+                  top: rect.top - 6,
+                  left: rect.left - 6,
+                  width: rect.width + 12,
+                  height: rect.height + 12,
+                  boxShadow: "0 0 0 9999px rgba(16, 44, 35, 0.6)",
+                }}
+              />
+            )}
             <span
               aria-hidden="true"
-              className="absolute rounded-xl"
+              className="bd-pulse pointer-events-none absolute rounded-xl outline outline-2 outline-bd-blue"
               style={{
                 top: rect.top - 6,
                 left: rect.left - 6,
                 width: rect.width + 12,
                 height: rect.height + 12,
-                boxShadow: "0 0 0 9999px rgba(16, 44, 35, 0.6)",
               }}
             />
-          )}
-          <span
-            aria-hidden="true"
-            className="bd-pulse pointer-events-none absolute rounded-xl outline outline-2 outline-bd-blue"
-            style={{
-              top: rect.top - 6,
-              left: rect.left - 6,
-              width: rect.width + 12,
-              height: rect.height + 12,
-            }}
-          />
-          {tap && <TapPointer x={tap.x} y={tap.y} />}
-        </div>
-      )}
+            {tap && <TapPointer x={tap.x} y={tap.y} />}
+          </div>,
+          document.body,
+        )}
 
       <aside
         ref={cardRef}
